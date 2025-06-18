@@ -1,0 +1,43 @@
+# Cloudflare Worker 项目的顶级配置文件
+name = "community-board"
+main = "worker/src/index.ts"
+compatibility_date = "2024-05-30"
+compatibility_flags = [ "nodejs_compat" ]
+
+# [vars]
+# This section defines environment variables for your Worker.
+# The auth code uses these to configure Passkeys correctly.
+[vars]
+RP_NAME = "Community Board"
+# IMPORTANT: In production, change RP_ID and ORIGIN to your actual domain.
+RP_ID = "localhost"
+ORIGIN = "http://localhost:5173" # Default for Vite dev server
+
+# [dev]
+# This block configures the local development server (`wrangler dev`).
+# Explicitly setting the port helps avoid ambiguity and potential conflicts.
+[dev]
+port = 8787
+
+# 将前端 UI 构建的静态资源目录绑定到 Worker.
+[[sites]]
+bucket = "./ui/dist"
+
+# D1 数据库绑定.
+[[d1_databases]]
+binding = "DB"
+database_name = "community-db"
+database_id = "your-d1-database-id" # !!! 重要: 请用你自己的 D1 数据库 ID 替换这里
+migrations_dir = "worker/migrations"
+
+# KV Namespace 绑定.
+[[kv_namespaces]]
+binding = "KV_SESSIONS"
+id = "your-kv-sessions-id" # !!! 重要: 请用你自己的 KV Namespace ID 替换这里
+preview_id = "your-kv-sessions-preview-id" # !!! 重要: 请用你自己的 KV 预览 ID 替换这里
+
+# R2 Bucket 绑定.
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "community-assets"
+preview_bucket_name = "community-assets-preview"
