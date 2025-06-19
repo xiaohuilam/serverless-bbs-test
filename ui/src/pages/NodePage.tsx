@@ -67,7 +67,7 @@ export default function NodePage() {
     <div className="max-w-[960px] mx-auto w-full space-y-4">
       <div className="flex justify-between items-center mb-2">
         <h1 className="text-xl font-bold">{node.name}</h1>
-        <Button className="bg-[#336699] hover:bg-[#2366A8] rounded-sm text-sm px-4 h-8" onClick={() => navigate(isAuthenticated ? `/new-thread/${nodeId}` : '/auth')}>
+        <Button className="bg-[#336699] hover:bg-[#2366A8] text-white rounded-sm text-sm px-4 h-8" onClick={() => navigate(isAuthenticated ? `/new-thread/${nodeId}` : '/auth')}>
           发帖
         </Button>
       </div>

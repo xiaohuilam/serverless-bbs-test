@@ -11,6 +11,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import UserThreadsPage from './pages/UserThreadsPage'; // 1. 引入新页面
 import { useAuth } from './hooks/useAuth';
 import SearchPage from './pages/SearchPage';
+import RankingsPage from './pages/RankingsPage';
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -34,6 +35,7 @@ function App() {
           <Route path="/settings" element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
           <Route path="/notifications" element={<PrivateRoute><NotificationsPage /></PrivateRoute>} />
           <Route path="/search" element={<SearchPage />} /> {/* 2. 添加搜索结果页的路由 */}
+          <Route path="/rankings" element={<RankingsPage />} /> {/* 2. 添加排行榜页面的路由 */}
         </Routes>
       </Layout>
     </Router>

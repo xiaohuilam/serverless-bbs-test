@@ -68,7 +68,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 />
                 <Select value={searchType} onValueChange={setSearchType}>
-                    <SelectTrigger className="w-[70px] h-8 rounded-none text-xs border-l-0 border-gray-300">
+                    <SelectTrigger className="w-[70px] h-8 rounded-none text-xs border-x-0 border-gray-300">
                         {searchType === 'threads' ? '帖子' : '用户'}
                     </SelectTrigger>
                     <SelectContent className='bg-white dark:bg-gray-800'>
@@ -84,7 +84,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* 主导航 */}
-      <div className="bg-[#336699] text-white shadow-inner">
+      <div className="bg-[#2B7ACD] text-white shadow-inner">
          <div className="max-w-[960px] mx-auto h-10 flex justify-between items-center">
             <div className="flex items-center">
                 <Link to="/" className="h-10 font-bold text-sm bg-[#12406f] px-4 py-2 rounded-sm">论坛</Link>
@@ -102,8 +102,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       <footer className="w-full mt-8">
           <div className="max-w-[960px] mx-auto py-4 px-4 text-center text-xs text-[#666] border-t border-[#CDCDCD]">
-            <p>Powered by <strong>Discuz! X3.5</strong></p>
-            <p className="mt-1">© 2001-2025 Comsenz Inc.</p>
+            <p>Powered by <a href="https://github.com/serverless-bbs/serverless-bbs" className='font-bold hover:underline hover:text-[#336699]' target="_blank">ServerlessDiscuz!</a></p>
+            <p className="mt-1">© 2004-2025 Thanks to Comsenz Inc, Cloudflare Inc...</p>
           </div>
       </footer>
     </div>

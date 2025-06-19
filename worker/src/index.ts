@@ -11,6 +11,7 @@ import users from './routes/users';
 import messages from './routes/messages'; // 1. 引入新的路由
 import reminders from './routes/reminders'; // 1. 引入新路由
 import search from './routes/search'; // 1. 引入新路由
+import rankings from './routes/rankings';
 import { tryAuthMiddleware } from './auth/tryAuthMiddleware';
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -35,7 +36,7 @@ api.route('/messages', messages); // 2. 挂载私信路由
 api.route('/messages', messages);
 api.route('/reminders', reminders); // 2. 挂载新路由
 api.route('/search', search);
-
+api.route('/rankings', rankings); // 2. 挂载排行榜路由
 
 app.get('/avatars/:key{.+$}', async (c) => {
   const key = c.req.param('key');

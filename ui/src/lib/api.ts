@@ -1,3 +1,5 @@
+import { toast } from "@/components/ui/use-toast";
+
 const API_BASE_URL = '/api'; // Vite 代理会处理这个
 
 class ApiClient {

@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import type { ThreadWithDetails, PollOption, UserVote, Reply } from '../../types'; // 从共享类型导入
 import defaultAvatar from '@/img/default_avatar.svg';
+import { Mail } from 'lucide-react';
 
 // --- 子组件 ---
 
@@ -49,12 +50,12 @@ const PollComponent = ({ threadId, options, userVote, onVoted }: { threadId: num
                     const percentage = totalVotes > 0 ? (opt.vote_count / totalVotes) * 100 : 0;
                     return (
                         <div key={opt.id}>
-                            <input type="radio" id={`poll-option-${opt.id}`} name="poll-vote" disabled={hasVoted} value={opt.id} onChange={() => setSelectedOption(opt.id)} className="mr-2 h-4 w-4"/>
+                            <input type="radio" id={`poll-option-${opt.id}`} name="poll-vote" disabled={hasVoted} value={opt.id} onChange={() => setSelectedOption(opt.id)} className="mr-2 h-4 w-4" />
                             <label htmlFor={`poll-option-${opt.id}`}>{opt.option_text}</label>
                             <div className="flex items-center space-x-3">
-                                <div className="w-full bg-gray-200 rounded-sm h-3">
-                                    <div 
-                                        className={`${barColors[index % barColors.length]} h-3 rounded-sm`} 
+                                <div className="w-full bg-gray-200 h-3">
+                                    <div
+                                        className={`${barColors[index % barColors.length]} h-3`}
                                         style={{ width: `${percentage}%` }}
                                     ></div>
                                 </div>
@@ -88,27 +89,32 @@ const Post = ({ post, isOp, floor, onQuote, onVoted }: { post: (ThreadWithDetail
     const hasQuote = 'quoted_author' in post && post.quoted_author;
 
     return (
-        <div className="bg-white border border-[#CDCDCD] rounded-sm flex">
-            <div className="w-40 shrink-0 border-r border-[#E5EDF2] p-4 text-center text-xs bg-[#F5FAFE]">
-                <div className="border-b border-dashed border-[#E5EDF2] pb-3 mb-4">
+        <div className="bg-white border-x border-[#CDCDCD] border-b-4 border-b-[#C2D5E3] flex">
+            <div className="w-40 shrink-0 border-r bg-[#E5EDF2] pt-2 pb-8 text-left text-xs">
+                <div className="border-b border-dashed border-b-[#cdcdcd] pb-3 mb-4 px-4">
                     <Link to={`/users/${post.author_id}`} className="font-bold text-base text-[#336699] hover:underline">{post.author_username}</Link>
                 </div>
-                <div className="my-2">
+                <div className="my-2 px-4">
                     <Link to={`/users/${post.author_id}`}>
-                        <img src={avatarUrl} className="mx-auto w-full rounded-sm object-cover" alt="avatar" />
+                        <img src={avatarUrl} className="mx-auto w-full object-cover" alt="avatar" />
                     </Link>
                 </div>
+                <div className='px-4'>
                 <p>中级会员</p><div className="my-2 space-y-1"><p>主题: 15</p><p>回帖: 136</p><p>积分: 340</p></div>
-                <Button size="sm" variant="outline" className="h-6 px-2 text-xs" onClick={handleSendMessage}>发消息</Button>
+                <a className="inline-flex text-xs cursor-pointer text-[#369] hover:underline" onClick={handleSendMessage}>
+                    <Mail className='text-[#369] w-[15px]' />
+                    发消息
+                </a>
+                </div>
             </div>
-            <div className="w-full p-4 bg-white" id={`reply-${post.id}`}>
+            <div className="w-full p-2 px-4 bg-white" id={`reply-${post.id}`}>
                 <div className="flex justify-between items-center text-xs text-gray-500 border-b border-dashed border-[#E5EDF2] pb-2 mb-4">
                     <span>发表于: {format(new Date(post.created_at * 1000), 'yyyy-MM-dd HH:mm:ss')}</span>
                     <div>{isOp && <span className="mr-2">楼主</span>}<span className="font-bold text-lg">#{floor}</span></div>
                 </div>
-                
+
                 <div className="prose prose-sm max-w-none text-base leading-relaxed" dangerouslySetInnerHTML={{ __html: post.body }} />
-                
+
                 {isOp && post.type === 'poll' && post.poll_options && onVoted && (
                     <PollComponent
                         threadId={post.id}
@@ -147,24 +153,24 @@ const QuickReplyForm = ({ threadId, onReplyPosted, quotingReply, clearQuoting }:
         //     return;
         // }
 
-        if (!body.trim() || body === '<br>') return; 
-        try { 
+        if (!body.trim() || body === '<br>') return;
+        try {
             await apiClient.post(`/threads/${threadId}/replies`, { body, replyToId: quotingReply ? quotingReply.id : null });
-            toast({ title: "成功", description: "回复已发布。" }); 
-            setBody(''); 
-            clearQuoting(); 
-            onReplyPosted(); 
-        } catch (error: any) { 
-            toast({ title: "错误", description: error.message || "发布失败", }); 
-        } 
+            toast({ title: "成功", description: "回复已发布。" });
+            setBody('');
+            clearQuoting();
+            onReplyPosted();
+        } catch (error: any) {
+            toast({ title: "错误", description: error.message || "发布失败", });
+        }
     };
 
     if (!isAuthenticated) return null;
     return (
-        <div className="border border-[#CDCDCD] rounded-sm flex mt-4">
-            <div className="w-40 shrink-0 border-r border-[#E5EDF2] p-4 text-center text-xs bg-[#F5FAFE]"><a href="#" className="font-bold text-base text-[#336699]">{user?.username}</a><div className="my-2"><img src={avatarUrl} className="mx-auto w-full rounded-sm object-cover" alt="avatar" /></div></div>
-            <div className="w-full bg-white p-4">{quotingReply && (<div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 text-xs mb-2 rounded-sm">正在回复: <strong>{quotingReply.author_username}</strong> 的帖子 <button onClick={clearQuoting} className="float-right font-bold hover:text-black">取消</button></div>)}<RichTextEditor value={body} onChange={setBody} /><div className="mt-2"><Button onClick={handleSubmit} className="bg-[#0066CC] hover:bg-[#0055AA] text-white rounded-sm text-sm px-6 h-8 font-bold">发表回复</Button></div></div>
-        </div>
+        <>
+            <div className="w-40 shrink-0 border-r border-[#E5EDF2] p-4 text-center text-xs bg-[#F5FAFE]"><a href="#" className="font-bold text-base text-[#336699]">{user?.username}</a><div className="my-2"><img src={avatarUrl} className="mx-auto w-full object-cover" alt="avatar" /></div></div>
+            <div className="w-full bg-white p-4">{quotingReply && (<div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 text-xs mb-2">正在回复: <strong>{quotingReply.author_username}</strong> 的帖子 <button onClick={clearQuoting} className="float-right font-bold hover:text-black">取消</button></div>)}<RichTextEditor value={body} onChange={setBody} /><div className="mt-2"><Button onClick={handleSubmit} className="bg-[#0066CC] hover:bg-[#0055AA] text-white text-sm px-6 h-8 font-bold">发表回复</Button></div></div>
+        </>
     );
 };
 
@@ -208,24 +214,35 @@ export default function ThreadPage() {
     if (!thread) return <div className="max-w-[960px] mx-auto text-center py-10">未找到该帖子或加载失败。</div>;
 
     return (
-        <div className="max-w-[960px] mx-auto w-full space-y-4">
-            <h1 className="text-xl font-bold break-words">{thread.title}</h1>
-            <Post 
-                post={thread} 
-                isOp={true} 
-                floor={1} 
-                onQuote={() => {}} // 主楼的 onQuote 是一个空操作，因为按钮已被移除
-                onVoted={fetchThread} 
+        <div className="max-w-[960px] mx-auto w-full space-y-0">
+            <div className="bg-white border border-[#CDCDCD] border-r-[#C2D5E3] border-b-4 border-b-[#C2D5E3]  flex">
+                <div className="w-40 shrink-0 border-r bg-[#E5EDF2] p-4 text-center text-xs text-[#999]">
+                    查看:
+                    <span className='text-[#F26C4F] mr-1'>3228</span>
+                    |
+                    回复: 
+                    <span className='text-[#F26C4F]'>54</span>
+                </div>
+                <div className="w-full px-2 py-3 bg-white" id="reply-3">
+                    <h1 className="font-bold break-words px-2">{thread.title}</h1>
+                </div>
+            </div>
+            <Post
+                post={thread}
+                isOp={true}
+                floor={1}
+                onQuote={() => { }} // 主楼的 onQuote 是一个空操作，因为按钮已被移除
+                onVoted={fetchThread}
             />
             {thread.replies.map((reply: Reply, index: number) => (
-                <Post 
-                    key={reply.id} 
-                    post={reply} 
-                    floor={index + 2} 
-                    onQuote={() => handleSetQuoting(reply)} 
+                <Post
+                    key={reply.id}
+                    post={reply}
+                    floor={index + 2}
+                    onQuote={() => handleSetQuoting(reply)}
                 />
             ))}
-            <div ref={replyFormRef}>
+            <div ref={replyFormRef} className="border border-[#CDCDCD] border-t-0 flex mt-4">
                 <QuickReplyForm
                     threadId={threadId!}
                     onReplyPosted={fetchThread}
