@@ -57,7 +57,6 @@ export default function Breadcrumbs() {
                     console.error("Failed to fetch breadcrumb data for path:", to, error);
                 }
             }
-            console.log(newCrumbs);
             
             // 过滤掉重复路径并更新状态
             const uniqueCrumbs = newCrumbs.filter((v, i, a) => a.findIndex(t => (t.path === v.path)) === i);

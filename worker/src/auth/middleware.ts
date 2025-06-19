@@ -29,7 +29,7 @@ export const authMiddleware = createMiddleware<{ Bindings: Bindings, Variables: 
   }
 
   // 从 D1 中获取用户详细信息
-  const user = await c.env.DB.prepare('SELECT id, username, email, created_at, profile_bio, avatar_r2_key FROM Users WHERE id = ?')
+  const user = await c.env.DB.prepare('SELECT id, username, email, created_at, profile_bio, avatar FROM Users WHERE id = ?')
    .bind(userId)
    .first<User>();
 

@@ -6,6 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/lib/api';
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
+import defaultAvatar from '@/img/default_avatar.svg';
+import { BadgeInfo, Mail } from 'lucide-react';
 
 // --- 类型定义 ---
 type NavItem = 'messages' | 'reminders';
@@ -24,11 +26,12 @@ interface Message {
     body: string;
     created_at: number;
     author_username: string;
-    author_avatar: string; // 这就是 avatar_r2_key
+    author_avatar: string;
 }
 interface Reminder {
     id: number;
     created_at: number;
+    actor_id: number;
     actor_username: string;
     actor_avatar: string;
     thread_title: string;
@@ -42,11 +45,22 @@ const NotificationsNav = ({ activeTab, setActiveTab }: { activeTab: NavItem, set
     <div className="w-40 shrink-0 bg-white border-r border-[#E5EDF2]">
         <h2 className="px-6 pt-4 pb-2 text-base font-bold text-gray-800">通知</h2>
         <ul className="mt-2">
-            <li key='messages'><button onClick={() => setActiveTab('messages')} className={`w-full text-left px-6 py-2 text-sm flex items-center ${activeTab === 'messages' ? 'bg-[#E5EDF2] font-bold' : 'hover:bg-gray-50'}`}><div className="w-5 h-5 mr-2" style={{ background: `url(https://www.hostloc.com/static/image/common/pm.gif) no-repeat center`}}/>消息</button></li>
-            <li key='reminders'><button onClick={() => setActiveTab('reminders')} className={`w-full text-left px-6 py-2 text-sm flex items-center ${activeTab === 'reminders' ? 'bg-[#E5EDF2] font-bold' : 'hover:bg-gray-50'}`}><div className="w-5 h-5 mr-2" style={{ background: `url(https://www.hostloc.com/static/image/common/system.gif) no-repeat center`}}/>系统提醒</button></li>
+            <li key='messages'>
+                <button onClick={() => setActiveTab('messages')} className={`w-full text-left px-6 py-2 text-sm flex items-center ${activeTab === 'messages' ? 'bg-[#E5EDF2] font-bold' : 'hover:bg-gray-50'}`}>
+                    <Mail className='text-gray-500 text-xs mr-1' />
+                    消息
+                </button>
+            </li>
+            <li key='reminders'>
+                <button onClick={() => setActiveTab('reminders')} className={`w-full text-left px-6 py-2 text-sm flex items-center ${activeTab === 'reminders' ? 'bg-[#E5EDF2] font-bold' : 'hover:bg-gray-50'}`}>
+                    <BadgeInfo className='text-gray-500 text-xs mr-1' />
+                    系统提醒
+                </button>
+            </li>
         </ul>
     </div>
 );
+
 
 // 提醒面板
 const RemindersPanel = () => {
@@ -69,10 +83,10 @@ const RemindersPanel = () => {
                 {!loading && reminders.length === 0 && <p className="p-6 text-center text-gray-500">没有新的提醒</p>}
                 {reminders.map(item => (
                     <div key={item.id} className="p-4 flex items-start space-x-3">
-                        <img src={`https://www.hostloc.com/uc_server/avatar.php?uid=${item.id+2}&size=small`} alt={item.actor_username} className="w-8 h-8 rounded" />
+                        <img src={item.actor_avatar ? item.actor_avatar : defaultAvatar} alt={item.actor_username} className="w-8 h-8 rounded" />
                         <div className="flex-grow text-sm">
                             <p className="text-xs text-gray-400 mb-1">{formatDistanceToNow(new Date(item.created_at * 1000), { addSuffix: true, locale: zhCN })}</p>
-                            <p className="text-gray-800"><Link to={`/users/${item.actor_username}`} className="text-[#336699] font-semibold">{item.actor_username}</Link>{' '}回复了您的帖子{' '}<Link to={`/threads/${item.thread_id}`} className="text-[#336699]">{item.thread_title}</Link></p>
+                            <p className="text-gray-800"><Link to={`/users/${item.actor_id}`} className="text-[#336699] font-semibold">{item.actor_username}</Link>{' '}回复了您的帖子{' '}<Link to={`/threads/${item.thread_id}`} className="text-[#336699]">{item.thread_title}</Link></p>
                         </div>
                         <Link to={`/threads/${item.thread_id}`} className="text-sm text-[#336699] hover:underline shrink-0">查看</Link>
                     </div>
@@ -82,12 +96,11 @@ const RemindersPanel = () => {
     );
 };
 
-const defaultAvatarSmall = 'https://static.trustserver.cn/assets/tmp/img/default_avatar.svg';
 
 const ConversationList = ({ conversations, onSelectConversation }: { conversations: ConversationSummary[], onSelectConversation: (id: number, partner: string) => void }) => (
     <div>
         {conversations.map(convo => {
-            const avatarUrl = convo.partner_avatar ? `/avatars/${convo.partner_avatar}` : defaultAvatarSmall;
+            const avatarUrl = convo.partner_avatar ? convo.partner_avatar : defaultAvatar;
             return (
                 <div key={convo.id} className="p-4 border-b border-[#E5EDF2] flex space-x-4 hover:bg-gray-50 cursor-pointer" onClick={() => onSelectConversation(convo.id, convo.partner_username)}>
                     <img src={avatarUrl} alt={convo.partner_username} className="w-12 h-12 rounded-sm" />
@@ -128,7 +141,7 @@ const ConversationView = ({ conversationId, partnerUsername, onBack, onSent }: {
             <div className="px-4 py-2 text-sm border-b border-[#E5EDF2]">共有 {messages.length} 条与 <strong className="text-[#336699]">{partnerUsername}</strong> 的交谈记录</div>
             <div className="p-4 space-y-4 max-h-[50vh] overflow-y-auto">
                 {messages.map((msg) => {
-                    const avatarUrl = msg.author_avatar ? `/avatars/${msg.author_avatar}` : defaultAvatarSmall;
+                    const avatarUrl = msg.author_avatar ? msg.author_avatar : defaultAvatar;
                     return (
                         <div key={msg.id} className="flex space-x-4">
                             <img src={avatarUrl} alt="avatar" className="w-12 h-12 rounded-sm" />
@@ -142,7 +155,7 @@ const ConversationView = ({ conversationId, partnerUsername, onBack, onSent }: {
                 })}
             </div>
             <div className="p-4 border-t border-[#E5EDF2] flex space-x-4">
-                 <img src={user?.avatar_r2_key ? `/avatars/${user.avatar_r2_key}` : defaultAvatarSmall} alt={user?.username} className="w-12 h-12 rounded-sm" />
+                 <img src={user?.avatar ? user.avatar : defaultAvatar} alt={user?.username} className="w-12 h-12 rounded-sm" />
                 <div className="flex-grow">
                     <RichTextEditor value={replyBody} onChange={setReplyBody} />
                     <div className="mt-2"><Button onClick={handleSendReply} className="bg-[#336699] hover:bg-[#2366A8] rounded-sm text-sm px-6 h-8 font-bold">发送</Button></div>
@@ -173,7 +186,7 @@ const NewMessageView = ({ recipient, onSent, onBack }: { recipient: string, onSe
              </div>
              <div className="mt-4 flex space-x-4">
                 <Button onClick={handleSendMessage} className="bg-[#336699] hover:bg-[#2366A8] rounded-sm text-sm px-6 h-8 font-bold">发送</Button>
-                <Button variant="outline" onClick={onBack}>取消</Button>
+                <Button variant="outline" className='rounded-sm text-sm px-6 h-8 font-bold' onClick={onBack}>取消</Button>
              </div>
         </div>
     )

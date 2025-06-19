@@ -20,7 +20,8 @@ app.get('/', async (c) => {
           n.reply_count,
           (SELECT t.title FROM Threads t WHERE t.node_id = n.id ORDER BY t.last_reply_at DESC LIMIT 1) as last_post_title,
           (SELECT t.id FROM Threads t WHERE t.node_id = n.id ORDER BY t.last_reply_at DESC LIMIT 1) as last_post_thread_id,
-          (SELECT t.last_reply_at FROM Threads t WHERE t.node_id = n.id ORDER BY t.last_reply_at DESC LIMIT 1) as last_post_time
+          (SELECT t.last_reply_at FROM Threads t WHERE t.node_id = n.id ORDER BY t.last_reply_at DESC LIMIT 1) as last_post_time,
+          (SELECT t.last_reply_id FROM Threads t WHERE t.node_id = n.id ORDER BY t.last_reply_id DESC LIMIT 1) as last_reply_id
       FROM
           Nodes n
       ORDER BY
@@ -44,7 +45,7 @@ app.get('/:id', async (c) => {
       'SELECT id, name, description, parent_node_id, thread_count, reply_count FROM Nodes WHERE id = ?'
     ).bind(id).first();
 
-    if (!node) {
+    if (!node || !node.parent_node_id) {
       return c.json({ error: 'Node not found' }, 404);
     }
     return c.json(node);

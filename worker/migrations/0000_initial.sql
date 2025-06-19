@@ -18,7 +18,7 @@ CREATE TABLE Users (
     email TEXT NOT NULL UNIQUE,
     created_at INTEGER NOT NULL,
     profile_bio TEXT,
-    avatar_r2_key TEXT -- 指向 R2 中用户头像的键
+    avatar TEXT -- 指向 R2 中用户头像的键
 );
 
 CREATE TABLE Credits (
@@ -61,7 +61,7 @@ CREATE TABLE Threads (
     reply_count INTEGER DEFAULT 0,
     is_pinned BOOLEAN DEFAULT 0,
     is_locked BOOLEAN DEFAULT 0,
-    body_r2_key TEXT NOT NULL, -- 指向 R2 中帖子正文的键
+    body TEXT NOT NULL, -- 指向 R2 中帖子正文的键
     FOREIGN KEY (node_id) REFERENCES Nodes(id) ON DELETE CASCADE,
     FOREIGN KEY (author_id) REFERENCES Users(id) ON DELETE CASCADE
 );
@@ -71,7 +71,7 @@ CREATE TABLE Replies (
     thread_id INTEGER NOT NULL,
     author_id TEXT NOT NULL,
     created_at INTEGER NOT NULL,
-    body_r2_key TEXT NOT NULL, -- 指向 R2 中回复正文的键
+    body TEXT NOT NULL, -- 指向 R2 中回复正文的键
     reply_to_id INTEGER, -- 用于引用其他回复，可为空
     FOREIGN KEY (thread_id) REFERENCES Threads(id) ON DELETE CASCADE,
     FOREIGN KEY (author_id) REFERENCES Users(id) ON DELETE CASCADE,
@@ -84,7 +84,7 @@ CREATE TABLE Comments (
     parent_id INTEGER NOT NULL, -- 被评论的帖子或回复的 ID
     author_id TEXT NOT NULL,
     created_at INTEGER NOT NULL,
-    body_r2_key TEXT NOT NULL, -- 指向 R2 中评论正文的键
+    body TEXT NOT NULL, -- 指向 R2 中评论正文的键
     FOREIGN KEY (author_id) REFERENCES Users(id) ON DELETE CASCADE
 );
 

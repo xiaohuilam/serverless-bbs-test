@@ -11,7 +11,7 @@ export type Bindings = {
 };
 
 // User-related types
-export type User = { id: string; username: string; email: string; created_at: number; profile_bio?: string; avatar_r2_key?: string; };
+export type User = { id: string; username: string; email: string; created_at: number; profile_bio?: string; avatar?: string; level: number;};
 export type Passkey = { id: string; user_id: string; pubkey_blob: ArrayBuffer; sign_counter: number; created_at: number; };
 
 // Forum structure types
@@ -30,25 +30,45 @@ export type Thread = {
     reply_count: number; 
     is_pinned: boolean; 
     is_locked: boolean; 
-    body: string; // 不再是 body_r2_key
+    body: string;
+    type: 'discussion' | 'poll' | 'raffle'; // 新增：帖子类型
+    read_permission: number; // 新增：阅读权限
 };
-export type ThreadWithAuthor = Thread & { author_username: string; author_avatar_r2_key?: string };
+export type ThreadWithAuthor = Thread & { author_username: string; author_avatar?: string };
 
 export type Reply = { 
     id: number; 
     thread_id: number; 
     author_id: string; 
     created_at: number; 
-    body: string; // 不再是 body_r2_key
+    body: string; // 不再是 body
     reply_to_id: number | null; 
 };
 export type ReplyWithAuthor = Reply & {
     author_username: string;
-    author_avatar_r2_key?: string;
+    author_avatar?: string;
     quoted_author?: string;
     quoted_created_at?: number;
     quoted_body?: string; // body 现在直接从 join 的表中获取
 };
 
-export type Comment = { id: number; parent_type: 'thread' | 'reply'; parent_id: number; author_id: string; created_at: number; body_r2_key: string; };
-export type CommentWithAuthor = Comment & { author_username: string, author_avatar_r2_key?: string };
+export type Comment = { id: number; parent_type: 'thread' | 'reply'; parent_id: number; author_id: string; created_at: number; body: string; };
+export type CommentWithAuthor = Comment & { author_username: string, author_avatar?: string };
+
+// 新增投票相关类型
+export type PollOption = {
+    id: number;
+    thread_id: number;
+    option_text: string;
+    vote_count: number;
+};
+export type UserVote = {
+    poll_option_id: number;
+};
+
+// 扩展帖子详情类型以包含投票信息
+export type ThreadWithDetails = ThreadWithAuthor & {
+    replies: ReplyWithAuthor[];
+    poll_options?: PollOption[];
+    user_vote?: UserVote;
+};

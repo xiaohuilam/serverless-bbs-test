@@ -4,13 +4,14 @@ import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Mail } from 'lucide-react';
 import { format } from 'date-fns';
+import defaultAvatar from '@/img/default_avatar.svg';
 
 // 接口定义，完全匹配后端 API 的响应
 interface UserProfile {
     id: string;
     username: string;
     created_at: number;
-    avatar_r2_key?: string;
+    avatar?: string;
     credits: number;
     thread_count: number;
     reply_count: number;
@@ -66,8 +67,7 @@ export default function ProfilePage() {
         return <div className="max-w-[960px] mx-auto text-center py-10 text-red-500">用户不存在或加载失败。</div>;
     }
 
-    const defaultAvatar = 'https://static.trustserver.cn/assets/tmp/img/default_avatar.svg';
-    const avatarUrl = profile.avatar_r2_key ? `/avatars/${profile.avatar_r2_key}` : defaultAvatar;
+    const avatarUrl = profile.avatar ? profile.avatar : defaultAvatar;
 
     return (
         <div className="max-w-[960px] mx-auto w-full space-y-4">

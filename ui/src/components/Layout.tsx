@@ -1,13 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import { Select, SelectContent, SelectTrigger, SelectValue } from './ui/select';
+import { SelectItem } from '@radix-ui/react-select';
+import { Search } from 'lucide-react';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchType, setSearchType] = useState('threads');
+
+  const handleSearch = () => {
+      if (!searchTerm.trim()) return;
+      navigate(`/search?q=${encodeURIComponent(searchTerm)}&type=${searchType}`);
+  };
 
   const handleLogout = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -47,10 +57,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <h1 className="text-3xl font-bold text-[#336699] tracking-tighter">HOSTLOC.COM</h1>
             <p className="text-xs text-gray-400">全球主机交流</p>
           </Link>
-          <div className="flex items-center space-x-1">
-            <Input type="text" placeholder="请输入搜索内容" className="w-56 h-8 text-xs rounded-sm" />
-            <Button className="h-8 bg-[#336699] hover:bg-[#2366A8] rounded-sm text-sm px-4">帖子</Button>
-          </div>
+          {/* 更新后的搜索框 */}
+            <div className="flex items-center">
+                <Input 
+                    type="text" 
+                    placeholder="请输入搜索内容" 
+                    className="w-56 h-8 text-xs rounded-r-none border-gray-300 focus:border-gray-600"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                />
+                <Select value={searchType} onValueChange={setSearchType}>
+                    <SelectTrigger className="w-[70px] h-8 rounded-none text-xs border-l-0 border-gray-300">
+                        {searchType === 'threads' ? '帖子' : '用户'}
+                    </SelectTrigger>
+                    <SelectContent className='bg-white dark:bg-gray-800'>
+                        <SelectItem className='cursor-pointer' value="threads">帖子</SelectItem>
+                        <SelectItem className='cursor-pointer' value="users">用户</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Button className="h-8 bg-[#336699] hover:bg-[#2366A8] rounded-l-none" onClick={handleSearch}>
+                    <Search className='w-[16px] text-white' />
+                </Button>
+            </div>
         </div>
       </div>
 

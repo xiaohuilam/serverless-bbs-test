@@ -17,7 +17,7 @@ app.get('/', async (c) => {
             c.id, c.last_message_at, c.last_message_excerpt,
             -- 确定对话伙伴的用户名和头像
             CASE WHEN c.user1_id = ?1 THEN u2.username ELSE u1.username END as partner_username,
-            CASE WHEN c.user1_id = ?1 THEN u2.avatar_r2_key ELSE u1.avatar_r2_key END as partner_avatar,
+            CASE WHEN c.user1_id = ?1 THEN u2.avatar ELSE u1.avatar END as partner_avatar,
             -- 获取当前用户的未读消息数
             CASE WHEN c.user1_id = ?1 THEN c.user1_unread_count ELSE c.user2_unread_count END as unread_count
         FROM Conversations c
@@ -43,7 +43,7 @@ app.get('/:conversationId', async (c) => {
 
     // 获取消息
     const messagesQuery = `
-        SELECT pm.id, pm.body_r2_key, pm.created_at, u.username as author_username
+        SELECT pm.id, pm.body, pm.created_at, u.username as author_username
         FROM PrivateMessages pm
         JOIN Users u ON pm.author_id = u.id
         WHERE pm.conversation_id = ?
@@ -53,7 +53,7 @@ app.get('/:conversationId', async (c) => {
 
     // 从 R2 并行获取所有消息的正文
     const messagesWithBody = await Promise.all(messages.map(async (msg: any) => {
-        const obj = await c.env.R2_BUCKET.get(msg.body_r2_key);
+        const obj = await c.env.R2_BUCKET.get(msg.body);
         return { ...msg, body: obj ? await obj.text() : '' };
     }));
     
@@ -97,7 +97,7 @@ app.post('/', zValidator('json', sendMessageSchema), async (c) => {
     const bodyR2Key = `pm-body/${crypto.randomUUID()}`;
     await c.env.R2_BUCKET.put(bodyR2Key, body);
     
-    await db.prepare("INSERT INTO PrivateMessages (conversation_id, author_id, body_r2_key, created_at) VALUES (?, ?, ?, ?)")
+    await db.prepare("INSERT INTO PrivateMessages (conversation_id, author_id, body, created_at) VALUES (?, ?, ?, ?)")
         .bind(conversationId, user.id, bodyR2Key, now).run();
     
     const excerpt = body.replace(/<[^>]*>?/gm, '').substring(0, 50); // 移除HTML标签后截取

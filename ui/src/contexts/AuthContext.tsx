@@ -6,7 +6,7 @@ interface User {
   id: string;
   username: string;
   email: string;
-  avatar_r2_key?: string; // 可选的头像 R2 key
+  avatar?: string; // 可选的头像 R2 key
 }
 
 interface AuthContextType {

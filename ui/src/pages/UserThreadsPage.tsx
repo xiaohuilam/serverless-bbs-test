@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
+import defaultAvatar from '@/img/default_avatar.svg';
 
 // 定义用户主题帖的数据结构
 interface UserThread {
@@ -21,7 +22,7 @@ interface UserThread {
 interface UserInfo {
     id: string;
     username: string;
-    avatar_r2_key?: string;
+    avatar?: string;
 }
 
 // 辅助组件：页面头部，与个人资料页共享
@@ -29,8 +30,7 @@ const ProfileHeader = ({ user }: { user: UserInfo | null }) => {
     const navigate = useNavigate();
     if (!user) return null;
     
-    const defaultAvatar = 'https://static.trustserver.cn/assets/tmp/img/default_avatar.svg';
-    const avatarUrl = user.avatar_r2_key ? `/avatars/${user.avatar_r2_key}` : defaultAvatar;
+    const avatarUrl = user.avatar ? user.avatar : defaultAvatar;
     
     const handleSendMessage = () => {
         navigate('/notifications', { state: { newConversationWith: user.username } });

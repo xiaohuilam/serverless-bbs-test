@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from "@/components/ui/use-toast";
 import { apiClient } from '@/lib/api';
+import defaultAvatar from '@/img/default_avatar.svg';
 
 // 定义菜单项类型
 type NavItem = 'avatar' | 'profile' | 'credits' | 'group' | 'privacy' | 'security' | 'binding';
@@ -47,7 +48,7 @@ const AvatarPanel = () => {
     const { user } = useAuth();
     const { toast } = useToast();
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [preview, setPreview] = useState<string | null>(user?.avatar_r2_key ? `/avatars/${user.avatar_r2_key}` : null);
+    const [preview, setPreview] = useState<string | null>(user?.avatar ? user.avatar : null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,7 +69,7 @@ const AvatarPanel = () => {
             await apiClient.postFormData('/users/me/avatar', formData);
             toast({ title: "成功", description: "头像已更新。刷新页面即可查看最新效果。" });
         } catch (error) {
-            toast({ title: "错误", description: "头像上传失败。", variant: "destructive" });
+            toast({ title: "错误", description: "头像上传失败。",});
         }
     };
 
@@ -77,7 +78,7 @@ const AvatarPanel = () => {
             <h2 className="text-base text-gray-600 mb-4">当前我的头像</h2>
             <div className="flex">
                 <div className="w-48 h-48 bg-gray-200 flex items-center justify-center rounded-sm mr-8">
-                    <img src={preview || 'https://www.hostloc.com/uc_server/images/noavatar_middle.gif'} alt="Avatar preview" className="w-full h-full object-cover" />
+                    <img src={preview || defaultAvatar} alt="Avatar preview" className="w-full h-full object-cover" />
                 </div>
                 <div>
                     <h3 className="text-base text-gray-600 mb-4">设置我的新头像</h3>
@@ -97,6 +98,7 @@ const AvatarPanel = () => {
 
 // 个人资料面板
 const ProfilePanel = () => {
+    const { user } = useAuth();
     // 辅助组件
     const FormRow = ({ label, children, isPublicSelector = true }: { label: string, children: React.ReactNode, isPublicSelector?: boolean }) => (
         <div className="flex items-center py-3">
@@ -122,7 +124,7 @@ const ProfilePanel = () => {
                 <div className="px-4 py-2 text-gray-500 cursor-pointer hover:text-[#336699]">个人信息</div>
             </div>
             <div className="mt-6">
-                <FormRow label="用户名" isPublicSelector={false}>帝玺 SSL</FormRow>
+                <FormRow label="用户名" isPublicSelector={false}>{user.username}</FormRow>
                 <FormRow label="性别">
                      <Select defaultValue="secret">
                         <SelectTrigger className="w-48 h-7 text-xs"><SelectValue /></SelectTrigger>

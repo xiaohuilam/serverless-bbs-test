@@ -13,8 +13,9 @@ app.get('/', async (c) => {
         SELECT 
             r.id,
             r.created_at,
+            actor.id as actor_id,
             actor.username as actor_username,
-            actor.avatar_r2_key as actor_avatar,
+            actor.avatar as actor_avatar,
             t.title as thread_title,
             r.thread_id
         FROM Reminders r

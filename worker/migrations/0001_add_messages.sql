@@ -25,7 +25,7 @@ CREATE TABLE PrivateMessages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     conversation_id INTEGER NOT NULL,
     author_id TEXT NOT NULL,
-    body_r2_key TEXT NOT NULL, -- 消息正文存储在 R2
+    body TEXT NOT NULL, -- 消息正文存储在 R2
     created_at INTEGER NOT NULL,
     FOREIGN KEY (conversation_id) REFERENCES Conversations(id) ON DELETE CASCADE,
     FOREIGN KEY (author_id) REFERENCES Users(id) ON DELETE CASCADE

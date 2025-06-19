@@ -13,32 +13,6 @@ app.get('/me', (c) => {
   return c.json(user);
 });
 
-// 新增: 处理头像上传
-app.post('/me/avatar', async (c) => {
-    const user = c.get('user');
-    const formData = await c.req.formData();
-    const avatarFile = formData.get('avatar');
-
-    if (!avatarFile || !(avatarFile instanceof File)) {
-        return c.json({ error: 'No avatar file uploaded' }, 400);
-    }
-    
-    // 生成一个唯一的文件名
-    const avatarKey = `avatars/${user.id}/${crypto.randomUUID()}`;
-
-    // 上传文件到 R2
-    await c.env.R2_BUCKET.put(avatarKey, avatarFile, {
-        httpMetadata: { contentType: avatarFile.type },
-    });
-
-    // 更新用户在 D1 中的头像 key
-    await c.env.DB.prepare('UPDATE Users SET avatar_r2_key = ? WHERE id = ?')
-        .bind(avatarKey, user.id)
-        .run();
-
-    return c.json({ message: 'Avatar updated successfully', avatarKey });
-});
-
 // 获取指定用户的公开信息
 app.get('/:id', async (c) => {
   const id = c.req.param('id');
@@ -48,7 +22,7 @@ app.get('/:id', async (c) => {
           u.id,
           u.username,
           u.created_at,
-          u.avatar_r2_key,
+          u.avatar,
           c.balance as credits,
           (SELECT COUNT(*) FROM Threads WHERE author_id = u.id) as thread_count,
           (SELECT COUNT(*) FROM Replies WHERE author_id = u.id) as reply_count
@@ -110,6 +84,38 @@ app.get('/:id/threads', async (c) => {
         console.error(e);
         return c.json({ error: 'Failed to fetch user threads' }, 500);
     }
+});
+
+// 所有路由都需要认证
+app.use('*', authMiddleware);
+
+// 新增: 处理头像上传
+app.post('/me/avatar', async (c) => {
+    const user = c.get('user');
+    const formData = await c.req.formData();
+    const avatarFile = formData.get('avatar');
+
+    if (!avatarFile || !(avatarFile instanceof File)) {
+        return c.json({ error: 'No avatar file uploaded' }, 400);
+    }
+    
+    // 生成一个唯一的文件名
+    const avatarKey = `avatars/${user.id}/${crypto.randomUUID()}`;
+
+    // 将 File 转为 ArrayBuffer
+    const arrayBuffer = await avatarFile.arrayBuffer();
+
+    // 上传文件到 R2
+    await c.env.R2_BUCKET.put(avatarKey, arrayBuffer, {
+        httpMetadata: { contentType: avatarFile.type },
+    });
+
+    // 更新用户在 D1 中的头像 key
+    await c.env.DB.prepare('UPDATE Users SET avatar = ? WHERE id = ?')
+        .bind(avatarKey, user.id)
+        .run();
+
+    return c.json({ message: 'Avatar updated successfully', avatarKey });
 });
 
 export default app;

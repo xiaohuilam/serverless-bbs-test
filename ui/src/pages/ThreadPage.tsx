@@ -6,30 +6,85 @@ import { Button } from '@/components/ui/button';
 import { useToast } from "@/components/ui/use-toast";
 import { format } from 'date-fns';
 import { RichTextEditor } from '@/components/RichTextEditor';
-
-// --- 类型定义 ---
-interface UserInfo { author_username: string; }
-interface Reply extends UserInfo {
-    id: number;
-    body: string;
-    created_at: number;
-    quoted_author?: string;
-    quoted_created_at?: number;
-    quoted_body?: string;
-}
-interface Thread extends UserInfo { id: number; title: string; body: string; created_at: number; replies: Reply[]; }
+import type { ThreadWithDetails, PollOption, UserVote, Reply } from '../../types'; // 从共享类型导入
+import defaultAvatar from '@/img/default_avatar.svg';
 
 // --- 子组件 ---
 
+// 投票组件 (已更新样式和错误处理)
+const PollComponent = ({ threadId, options, userVote, onVoted }: { threadId: number, options: PollOption[], userVote?: UserVote, onVoted: () => void }) => {
+    const [selectedOption, setSelectedOption] = useState<number | null>(null);
+    const totalVotes = options.reduce((sum, opt) => sum + opt.vote_count, 0);
+    const hasVoted = !!userVote;
+    const { toast } = useToast();
 
-const Post = ({ post, isOp, floor, onQuote }: { post: (Thread | Reply) & {author_username: string, author_avatar_r2_key?: string}, isOp?: boolean, floor: number, onQuote: () => void }) => {
+    const handleSubmitVote = async () => {
+        if (selectedOption === null) {
+            toast({ title: "提示", description: "请选择一个选项再提交。" });
+            return;
+        }
+        try {
+            await apiClient.post(`/threads/${threadId}/vote`, { optionId: selectedOption });
+            onVoted();
+        } catch (error: any) {
+            // 已修复：确保能正确提取和显示错误信息
+            const description = error?.message || (typeof error === 'string' ? error : "出错了，请稍后再试。");
+            toast({
+                title: "投票失败",
+                description: description,
+            });
+            console.error(error);
+        }
+    };
+
+    const barColors = ['bg-red-500', 'bg-orange-400', 'bg-amber-400', 'bg-green-500', 'bg-sky-500', 'bg-indigo-500'];
+
+    return (
+        <div className="my-4 border border-[#E5EDF2] bg-[#F5FAFE] text-sm">
+            <div className="p-4 border-b border-[#E5EDF2]">
+                <p className="font-bold">单选投票: <span className="font-normal text-gray-500">(共有 {totalVotes} 人参与投票)</span></p>
+            </div>
+            <div className="p-4 space-y-4">
+                {options.map((opt, index) => {
+                    const percentage = totalVotes > 0 ? (opt.vote_count / totalVotes) * 100 : 0;
+                    return (
+                        <div key={opt.id}>
+                            <input type="radio" id={`poll-option-${opt.id}`} name="poll-vote" disabled={hasVoted} value={opt.id} onChange={() => setSelectedOption(opt.id)} className="mr-2 h-4 w-4"/>
+                            <label htmlFor={`poll-option-${opt.id}`}>{opt.option_text}</label>
+                            <div className="flex items-center space-x-3">
+                                <div className="w-full bg-gray-200 rounded-sm h-3">
+                                    <div 
+                                        className={`${barColors[index % barColors.length]} h-3 rounded-sm`} 
+                                        style={{ width: `${percentage}%` }}
+                                    ></div>
+                                </div>
+                                <span className="text-xs text-gray-500 w-28 text-left shrink-0">
+                                    {percentage.toFixed(2)}% (<strong className="text-red-500">{opt.vote_count}</strong>)
+                                </span>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+            <div className="p-4 border-t border-[#E5EDF2]">
+                {hasVoted ? (
+                    <p className="text-gray-500 text-sm">您已经投过票, 谢谢您的参与</p>
+                ) : (
+                    <Button size="sm" className="h-7 px-4 text-sm bg-[#336699] hover:bg-[#2366A8]" onClick={handleSubmitVote}>提交</Button>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const Post = ({ post, isOp, floor, onQuote, onVoted }: { post: (ThreadWithDetails | Reply) & { author_username: string, author_avatar?: string, body: string, created_at: number }, isOp?: boolean, floor: number, onQuote: () => void, onVoted?: () => void }) => {
     const navigate = useNavigate();
     const handleSendMessage = (e: React.MouseEvent) => {
         e.preventDefault();
         navigate('/notifications', { state: { newConversationWith: post.author_username } });
     };
-    const defaultAvatar = 'https://www.hostloc.com/uc_server/images/noavatar_middle.gif';
-    const avatarUrl = post.author_avatar_r2_key ? `/avatars/${post.author_avatar_r2_key}` : defaultAvatar;
+
+    const avatarUrl = post.author_avatar ? post.author_avatar : defaultAvatar;
     const hasQuote = 'quoted_author' in post && post.quoted_author;
 
     return (
@@ -46,14 +101,32 @@ const Post = ({ post, isOp, floor, onQuote }: { post: (Thread | Reply) & {author
                 <p>中级会员</p><div className="my-2 space-y-1"><p>主题: 15</p><p>回帖: 136</p><p>积分: 340</p></div>
                 <Button size="sm" variant="outline" className="h-6 px-2 text-xs" onClick={handleSendMessage}>发消息</Button>
             </div>
-            <div className="w-full p-4 bg-white">
+            <div className="w-full p-4 bg-white" id={`reply-${post.id}`}>
                 <div className="flex justify-between items-center text-xs text-gray-500 border-b border-dashed border-[#E5EDF2] pb-2 mb-4">
                     <span>发表于: {format(new Date(post.created_at * 1000), 'yyyy-MM-dd HH:mm:ss')}</span>
                     <div>{isOp && <span className="mr-2">楼主</span>}<span className="font-bold text-lg">#{floor}</span></div>
                 </div>
-                {hasQuote && ( <blockquote className="bg-[#F5FAFE] border border-[#E5EDF2] p-3 my-4 text-sm text-gray-600"> <p><strong>{post.quoted_author}</strong> 发表于 {format(new Date((post.quoted_created_at || 0) * 1000), 'yyyy-MM-dd HH:mm')}</p> <div className="mt-2" dangerouslySetInnerHTML={{ __html: post.quoted_body || '' }} /> </blockquote> )}
+                
                 <div className="prose prose-sm max-w-none text-base leading-relaxed" dangerouslySetInnerHTML={{ __html: post.body }} />
-                <div className="text-right mt-4"><Button onClick={onQuote} size="sm" variant="ghost" className="text-xs text-gray-500 hover:text-gray-900">回复</Button></div>
+                
+                {isOp && post.type === 'poll' && post.poll_options && onVoted && (
+                    <PollComponent
+                        threadId={post.id}
+                        options={post.poll_options}
+                        userVote={post.user_vote}
+                        onVoted={onVoted}
+                    />
+                )}
+
+                {hasQuote && (
+                    <blockquote className="bg-[#F5FAFE] border border-[#E5EDF2] p-3 my-4 text-sm text-gray-600">
+                        <p><strong>{post.quoted_author}</strong> 发表于 {format(new Date((post.quoted_created_at || 0) * 1000), 'yyyy-MM-dd HH:mm')}</p>
+                        <div className="mt-2" dangerouslySetInnerHTML={{ __html: post.quoted_body || '' }} />
+                    </blockquote>
+                )}
+                {!isOp &&
+                    <div className="text-right mt-4"><Button onClick={onQuote} size="sm" variant="ghost" className="text-xs text-gray-500 hover:text-gray-900">回复</Button></div>
+                }
             </div>
         </div>
     );
@@ -63,99 +136,103 @@ const QuickReplyForm = ({ threadId, onReplyPosted, quotingReply, clearQuoting }:
     const { isAuthenticated, user } = useAuth();
     const [body, setBody] = useState('');
     const { toast } = useToast();
-    
-    const defaultAvatar = 'https://www.hostloc.com/uc_server/images/noavatar_middle.gif';
-    const avatarUrl = user?.avatar_r2_key ? `/avatars/${user.avatar_r2_key}` : defaultAvatar;
-    
-    // **已修改**: 移除自动填充引用内容的 useEffect
-    // useEffect(() => {
-    //     if (quotingReply) {
-    //         const quoteHtml = `<blockquote>...</blockquote><br/>`;
-    //         setBody(quoteHtml);
-    //     } else {
-    //         setBody('');
-    //     }
-    // }, [quotingReply]);
+    const avatarUrl = user?.avatar ? user.avatar : defaultAvatar;
 
     const handleSubmit = async () => {
-        if (!body.trim() || body === '<br>') return;
-        try {
-            await apiClient.post(`/threads/${threadId}/replies`, { 
-                body, 
-                replyToId: quotingReply?.id 
-            });
-            toast({ title: "成功", description: "回复已发布。" });
-            setBody('');
-            clearQuoting();
-            onReplyPosted();
-        } catch (error) { /* ... */ }
+        // if (!quotingReply) {
+        //     toast({
+        //         title: "操作无效",
+        //         description: "请点击一个回帖下方的“回复”按钮来引用回复。",
+        //     });
+        //     return;
+        // }
+
+        if (!body.trim() || body === '<br>') return; 
+        try { 
+            await apiClient.post(`/threads/${threadId}/replies`, { body, replyToId: quotingReply ? quotingReply.id : null });
+            toast({ title: "成功", description: "回复已发布。" }); 
+            setBody(''); 
+            clearQuoting(); 
+            onReplyPosted(); 
+        } catch (error: any) { 
+            toast({ title: "错误", description: error.message || "发布失败", }); 
+        } 
     };
 
     if (!isAuthenticated) return null;
-
     return (
         <div className="border border-[#CDCDCD] rounded-sm flex mt-4">
-            <div className="w-40 shrink-0 border-r border-[#E5EDF2] p-4 text-center text-xs bg-[#F5FAFE]">
-                <a href="#" className="font-bold text-base text-[#336699]">{user?.username}</a>
-                <div className="my-2">
-                    <img src={avatarUrl} className="mx-auto w-full rounded-sm object-cover" alt="avatar" />
-                </div>
-            </div>
-            <div className="w-full bg-white p-4">
-                {quotingReply && ( <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 text-xs mb-2 rounded-sm">正在回复: <strong>{quotingReply.author_username}</strong> 的帖子 <button onClick={clearQuoting} className="float-right font-bold hover:text-black">取消</button></div> )}
-                <RichTextEditor value={body} onChange={setBody} />
-                <div className="mt-2"><Button onClick={handleSubmit} className="bg-[#0066CC] hover:bg-[#0055AA] text-white rounded-sm text-sm px-6 h-8 font-bold">发表回复</Button></div>
-            </div>
+            <div className="w-40 shrink-0 border-r border-[#E5EDF2] p-4 text-center text-xs bg-[#F5FAFE]"><a href="#" className="font-bold text-base text-[#336699]">{user?.username}</a><div className="my-2"><img src={avatarUrl} className="mx-auto w-full rounded-sm object-cover" alt="avatar" /></div></div>
+            <div className="w-full bg-white p-4">{quotingReply && (<div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 text-xs mb-2 rounded-sm">正在回复: <strong>{quotingReply.author_username}</strong> 的帖子 <button onClick={clearQuoting} className="float-right font-bold hover:text-black">取消</button></div>)}<RichTextEditor value={body} onChange={setBody} /><div className="mt-2"><Button onClick={handleSubmit} className="bg-[#0066CC] hover:bg-[#0055AA] text-white rounded-sm text-sm px-6 h-8 font-bold">发表回复</Button></div></div>
         </div>
     );
 };
 
+
 // --- 主页面组件 ---
 export default function ThreadPage() {
-  const { threadId } = useParams<{ threadId: string }>();
-  const [thread, setThread] = useState<Thread | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [quotingReply, setQuotingReply] = useState<Reply | null>(null);
-  const replyFormRef = useRef<HTMLDivElement>(null);
+    const { threadId } = useParams<{ threadId: string }>();
+    const [thread, setThread] = useState<ThreadWithDetails | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [quotingReply, setQuotingReply] = useState<Reply | null>(null);
+    const replyFormRef = useRef<HTMLDivElement>(null);
+    const { toast } = useToast();
 
-  const fetchThread = useCallback(async () => {
-    if (!threadId) return;
-    setLoading(true);
-    try {
-        const data = await apiClient.get<Thread>(`/threads/${threadId}`);
-        setThread(data);
-    } catch (error) { /* ... */ } 
-    finally { setLoading(false); }
-  }, [threadId]);
+    const fetchThread = useCallback(async () => {
+        if (!threadId) return;
+        setLoading(true);
+        try {
+            const data = await apiClient.get<ThreadWithDetails>(`/threads/${threadId}`);
+            setThread(data);
+            if (location.hash) {
+                const hash = location.hash;
+                location.hash = ``;
+                setTimeout(() => {
+                    location.hash = hash;
+                }, 50);
+            }
+        } catch (error: any) {
+            toast({ title: "加载失败", description: error.message, });
+        }
+        finally { setLoading(false); }
+    }, [threadId, toast]);
 
-  useEffect(() => { fetchThread(); }, [fetchThread]);
+    useEffect(() => { fetchThread(); }, [fetchThread]);
 
-  const handleSetQuoting = (reply: Reply) => {
-      setQuotingReply(reply);
-      replyFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  };
+    const handleSetQuoting = (reply: Reply) => {
+        setQuotingReply(reply);
+        replyFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
 
-  if (loading) return <div className="max-w-[960px] mx-auto text-center py-10">正在加载...</div>;
-  if (!thread) return <div className="max-w-[960px] mx-auto text-center py-10">未找到该帖子。</div>;
+    if (loading) return <div className="max-w-[960px] mx-auto text-center py-10">正在加载...</div>;
+    if (!thread) return <div className="max-w-[960px] mx-auto text-center py-10">未找到该帖子或加载失败。</div>;
 
-  return (
-    <div className="max-w-[960px] mx-auto w-full space-y-4">
-      <h1 className="text-xl font-bold break-words">{thread.title}</h1>
-      
-      <Post post={thread} isOp={true} floor={1} onQuote={() => handleSetQuoting(thread as unknown as Reply)} />
-
-      {thread.replies.map((reply, index) => (
-          <Post key={reply.id} post={reply} floor={index + 2} onQuote={() => handleSetQuoting(reply)} />
-      ))}
-      
-      <div ref={replyFormRef}>
-        <QuickReplyForm 
-            threadId={threadId!} 
-            onReplyPosted={fetchThread} 
-            quotingReply={quotingReply} 
-            clearQuoting={() => setQuotingReply(null)}
-        />
-      </div>
-    </div>
-  );
+    return (
+        <div className="max-w-[960px] mx-auto w-full space-y-4">
+            <h1 className="text-xl font-bold break-words">{thread.title}</h1>
+            <Post 
+                post={thread} 
+                isOp={true} 
+                floor={1} 
+                onQuote={() => {}} // 主楼的 onQuote 是一个空操作，因为按钮已被移除
+                onVoted={fetchThread} 
+            />
+            {thread.replies.map((reply: Reply, index: number) => (
+                <Post 
+                    key={reply.id} 
+                    post={reply} 
+                    floor={index + 2} 
+                    onQuote={() => handleSetQuoting(reply)} 
+                />
+            ))}
+            <div ref={replyFormRef}>
+                <QuickReplyForm
+                    threadId={threadId!}
+                    onReplyPosted={fetchThread}
+                    quotingReply={quotingReply}
+                    clearQuoting={() => setQuotingReply(null)}
+                />
+            </div>
+        </div>
+    );
 }

@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { authMiddleware } from '../auth/middleware';
-import type { Bindings, Thread, ThreadWithAuthor, ReplyWithAuthor, CommentWithAuthor, User } from '../types';
+import type { Bindings, Thread, ThreadWithAuthor, ReplyWithAuthor, CommentWithAuthor, User, PollOption, UserVote, ThreadWithDetails } from '../types';
 
 const app = new Hono<{ Bindings: Bindings, Variables: { user: User } }>();
 
@@ -19,7 +19,7 @@ app.get('/', zValidator('query', listThreadsSchema), async (c) => {
 
     try {
         const query = c.env.DB.prepare(`
-            SELECT t.*, u.username as author_username, u.avatar_r2_key as author_avatar_r2_key, last_reply_user.username as last_reply_username
+            SELECT t.*, u.username as author_username, u.avatar as author_avatar, last_reply_user.username as last_reply_username, t.reply_count, t.view_count, t.last_reply_at, t.last_reply_id, t.is_pinned
             FROM Threads t
             JOIN Users u ON t.author_id = u.id
             LEFT JOIN Users last_reply_user ON t.last_reply_user_id = last_reply_user.id
@@ -39,51 +39,70 @@ app.get('/', zValidator('query', listThreadsSchema), async (c) => {
 
 // 创建一个新帖子
 const createThreadSchema = z.object({
-  nodeId: z.number().int().positive(),
-  title: z.string().min(5).max(150),
+  nodeId: z.number(),
+  title: z.string().min(5),
   body: z.string().min(10),
+  type: z.enum(['discussion', 'poll']),
+  readPermission: z.number().int().min(0),
+  pollOptions: z.array(z.string().min(1)).optional(),
 });
 
 app.post('/', authMiddleware, zValidator('json', createThreadSchema), async (c) => {
-    const { nodeId, title, body } = c.req.valid('json');
+    const { nodeId, title, body, type, readPermission, pollOptions } = c.req.valid('json');
+    if (type === 'poll' && (!pollOptions || pollOptions.length < 2)) {
+        return c.json({ error: '投票至少需要2个选项。' }, 400);
+    }
     const user = c.get('user');
     const now = Math.floor(Date.now() / 1000);
+    const db = c.env.DB;
+    
+    // 使用事务创建帖子和投票选项
+    const results = await db.batch([
+        db.prepare(`INSERT INTO Threads (node_id, author_id, title, body, type, read_permission, created_at, last_reply_at) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+        ).bind(nodeId, user.id, title, body, type, readPermission, now, now)
+    ]);
+    const newThreadId = results[0].meta.last_row_id;
 
-    // 1. 将帖子正文存入 R2
-    const bodyR2Key = `thread-body/${crypto.randomUUID()}`;
-    await c.env.R2_BUCKET.put(bodyR2Key, body);
-
-    // 2. 将帖子元数据存入 D1，并更新版块计数
-    try {
-        const { meta } = await c.env.DB.prepare(
-            `INSERT INTO Threads (node_id, author_id, title, created_at, last_reply_at, body) VALUES (?, ?, ?, ?, ?, ?)`
-        ).bind(nodeId, user.id, title, now, now, body).run(); // 直接插入 body
-        
-        const newThreadId = meta.last_row_id;
-
-        // 3. 使用 batch 更新版块计数和用户积分
-        await c.env.DB.batch([
-            c.env.DB.prepare('UPDATE Nodes SET thread_count = thread_count + 1 WHERE id = ?').bind(nodeId),
-            c.env.DB.prepare('UPDATE Credits SET balance = balance + 5, last_updated = ? WHERE user_id = ?').bind(now, user.id)
-        ]);
-
-        return c.json({ message: 'Thread created successfully', threadId: meta.last_row_id }, 201);
-    } catch (e) {
-        console.error(e);
-        // 如果数据库操作失败，应该考虑删除已上传到 R2 的对象
-        await c.env.R2_BUCKET.delete(bodyR2Key);
-        return c.json({ error: 'Failed to create thread' }, 500);
+    if (type === 'poll' && pollOptions) {
+        const stmts = pollOptions.map(option => 
+            db.prepare(`INSERT INTO PollOptions (thread_id, option_text) VALUES (?, ?)`).bind(newThreadId, option)
+        );
+        await db.batch(stmts);
     }
+    
+    return c.json({ message: '帖子创建成功', threadId: newThreadId }, 201);
 });
 
 
 // 获取单个帖子的详细信息 (已简化)
 app.get('/:id', async (c) => {
-    const id = c.req.param('id');
+    const threadId = parseInt(c.req.param('id'), 10);
     const db = c.env.DB;
-    try {
-        const thread = await db.prepare(`SELECT t.*, u.username as author_username FROM Threads t JOIN Users u ON t.author_id = u.id WHERE t.id = ?`).bind(id).first<ThreadWithAuthor>();
-        if (!thread) return c.json({ error: 'Thread not found' }, 404);
+    const user = c.get('user');
+
+    try {        
+        const thread = await db.prepare(`SELECT t.*, u.username as author_username, u.avatar, u.level as author_level FROM Threads t JOIN Users u ON t.author_id = u.id WHERE t.id = ?`).bind(threadId).first<any>();
+        if (!thread) return c.json({ error: '帖子未找到' }, 404);
+        
+        // 权限检查
+        if (thread.read_permission) {
+            if (!user || thread.read_permission > user.level) {
+                return c.json({ error: `您的等级不足，需要达到 Lv.${thread.read_permission} 才能查看此贴。` }, 403);
+            }
+        }
+
+        let poll_options: PollOption[] | undefined = undefined;
+        let user_vote: UserVote | undefined = undefined;
+
+        if (thread.type === 'poll') {
+            const { results } = await db.prepare("SELECT * FROM PollOptions WHERE thread_id = ?").bind(threadId).all<PollOption>();
+            poll_options = results;
+            if (user) {
+                const vote = await db.prepare("SELECT poll_option_id FROM PollVotes WHERE thread_id = ? AND user_id = ?").bind(threadId, user.id).first<UserVote>();
+                user_vote = vote || undefined;
+            }
+        }
 
         const repliesQuery = `
             SELECT r.*, u.username as author_username, qr.body as quoted_body, qu.username as quoted_author, qr.created_at as quoted_created_at
@@ -93,19 +112,40 @@ app.get('/:id', async (c) => {
             LEFT JOIN Users qu ON qr.author_id = qu.id
             WHERE r.thread_id = ? ORDER BY r.created_at ASC
         `;
-        const { results: replies } = await db.prepare(repliesQuery).bind(id).all<ReplyWithAuthor>();
-        
-        await db.prepare('UPDATE Threads SET view_count = view_count + 1 WHERE id = ?').bind(id).run();
+        const { results: replies } = await db.prepare(repliesQuery).bind(threadId).all<ReplyWithAuthor>();
 
-        return c.json({ ...thread, replies: replies || [] });
+        await db.prepare('UPDATE Threads SET view_count = view_count + 1 WHERE id = ?').bind(threadId).run();
+
+        const response: ThreadWithDetails = { ...thread, replies, poll_options, user_vote };
+        return c.json(response);
     } catch (e) {
         console.error(e);
         return c.json({ error: 'Failed to fetch thread details' }, 500);
     }
 });
 
+// 投票接口
+app.post('/:threadId/vote', authMiddleware, zValidator('json', z.object({ optionId: z.number() })), async (c) => {
+    const threadId = parseInt(c.req.param('threadId'), 10);
+    const { optionId } = c.req.valid('json');
+    const user = c.get('user');
+    const db = c.env.DB;
+
+    // 检查是否已投过票
+    const existingVote = await db.prepare("SELECT * FROM PollVotes WHERE thread_id = ? AND user_id = ?").bind(threadId, user.id).first();
+    if (existingVote) return c.json({ error: '您已经投过票了。' }, 409);
+
+    await db.batch([
+        db.prepare("INSERT INTO PollVotes (thread_id, user_id, poll_option_id) VALUES (?, ?, ?)").bind(threadId, user.id, optionId),
+        db.prepare("UPDATE PollOptions SET vote_count = vote_count + 1 WHERE id = ?").bind(optionId),
+    ]);
+    
+    return c.json({ message: '投票成功' });
+});
+
+
 // 发布回复
-const createReplySchema = z.object({ body: z.string().min(1), replyToId: z.number().int().positive().optional() });
+const createReplySchema = z.object({ body: z.string().min(1), replyToId: z.number().int().positive().nullable() });
 
 app.post('/:threadId/replies', authMiddleware, zValidator('json', createReplySchema), async (c) => {
     const threadId = parseInt(c.req.param('threadId'), 10);
@@ -115,11 +155,23 @@ app.post('/:threadId/replies', authMiddleware, zValidator('json', createReplySch
     const db = c.env.DB;
 
     try {
+        // 1. 获取原帖作者ID，用于后续创建提醒
+        const originalThread = await db.prepare("SELECT author_id FROM Threads WHERE id = ?").bind(threadId).first<{author_id: string}>();
+
+        if (!originalThread) {
+            return c.json({ error: "Thread not found" }, 404);
+        }
+
         const { meta } = await db.prepare(
             `INSERT INTO Replies (thread_id, author_id, created_at, body, reply_to_id) VALUES (?, ?, ?, ?, ?)`
         ).bind(threadId, user.id, now, body, replyToId || null).run(); // 直接插入 body
 
         const newReplyId = meta.last_row_id;
+
+        // 2. 更新帖子的最后回复信息，包括 last_reply_id
+        await db.prepare(
+            `UPDATE Threads SET reply_count = reply_count + 1, last_reply_at = ?, last_reply_user_id = ?, last_reply_id = ? WHERE id = ?`
+        ).bind(now, user.id, newReplyId, threadId).run();
 
         // 3. 使用 batch 更新帖子和版块的回复计数、最后回复时间以及用户积分
         await c.env.DB.batch([
@@ -135,12 +187,18 @@ app.post('/:threadId/replies', authMiddleware, zValidator('json', createReplySch
             ).bind(threadId),
              c.env.DB.prepare('UPDATE Credits SET balance = balance + 1, last_updated = ? WHERE user_id = ?').bind(now, user.id)
         ]);
-
+    
+        // 4. 创建提醒 (如果回复者不是原帖作者)
+        if (originalThread.author_id !== user.id) {
+            await db.prepare(
+                `INSERT INTO Reminders (recipient_id, actor_id, thread_id, reply_id, type, created_at)
+                VALUES (?, ?, ?, ?, 'reply_to_thread', ?)`
+            ).bind(originalThread.author_id, user.id, threadId, newReplyId, now).run();
+        }
         return c.json({ message: 'Reply posted successfully', replyId: meta.last_row_id }, 201);
 
     } catch (e) {
         console.error(e);
-        await c.env.R2_BUCKET.delete(bodyR2Key);
         return c.json({ error: 'Failed to post reply' }, 500);
     }
 });
