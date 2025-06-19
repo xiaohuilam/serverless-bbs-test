@@ -65,6 +65,7 @@ npx wrangler deploy
 
 ## 截图
 
+![首页 - 未登录](docs/7.png)
 ![首页](docs/1.png)
 ![版块页](docs/2.png)
 ![帖子页](docs/3.png)
