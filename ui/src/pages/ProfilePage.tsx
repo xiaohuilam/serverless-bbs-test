@@ -76,7 +76,7 @@ export default function ProfilePage() {
                     <img src={avatarUrl} alt="avatar" className="w-12 h-12 rounded object-cover" />
                     <div className="ml-4">
                         <h1 className="text-xl font-bold text-gray-800">{profile.username}</h1>
-                        <p className="text-sm text-gray-400">https://www.yourforum.net/?{profile.id}</p>
+                        <p className="text-sm text-gray-400">{window.location.origin}/users/{profile.id}</p>
                     </div>
                 </div>
                 <Button variant="outline" className="h-7 px-3 text-xs flex items-center space-x-1" onClick={handleSendMessage}>

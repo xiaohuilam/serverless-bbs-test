@@ -57,33 +57,35 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </Link>
           {isAuthenticated && user ? (
             <table className='text-right space-y-3'>
-              <tr>
-                <td>
-                  <div className='space-x-2'>
-                    <strong className="text-black">{user.username}</strong> 在线
-                    <span>|</span>
-                    <a href="/settings" className="text-[#333]">我的设置</a>
-                    <span>|</span>
-                    <a href="/notifications" className="text-[#333]">消息</a>
-                    <span>|</span>
-                    <a href="#" onClick={handleLogout} className="text-[#333]">退出</a>
-                  </div>
-                </td>
-                <td rowSpan={2} className='pl-2'>
-                  <Link to={`/users/${user.id}`}>
-                    <img src={user.avatar ? user.avatar : defaultAvatar} className="mx-auto object-cover w-[48px] h-[48px] border-[2px] border-t-[#F2F2F2] border-r-[#CDCDCD] border-b-[#CDCDCD] border-l-[#F2F2F2] rounded-[5px]" alt="avatar" />
-                  </Link>
-                </td>
-              </tr>
-              <tr>
-                <td className='pt-2'>
-                  <div className='space-x-2'>
-                    <strong className="text-black">积分: 4170</strong>
-                    <span>|</span>
-                    <a href="/settings" className="text-[#333]">用户组: 论坛元老</a>
-                  </div>
-                </td>
-              </tr>
+              <tbody>
+                <tr>
+                  <td>
+                    <div className='space-x-2'>
+                      <strong className="text-black">{user.username}</strong> 在线
+                      <span>|</span>
+                      <a href="/settings" className="text-[#333]">我的设置</a>
+                      <span>|</span>
+                      <a href="/notifications" className="text-[#333]">消息</a>
+                      <span>|</span>
+                      <a href="#" onClick={handleLogout} className="text-[#333]">退出</a>
+                    </div>
+                  </td>
+                  <td rowSpan={2} className='pl-2'>
+                    <Link to={`/users/${user.id}`}>
+                      <img src={user.avatar ? user.avatar : defaultAvatar} className="mx-auto object-cover w-[48px] h-[48px] border-[2px] border-t-[#F2F2F2] border-r-[#CDCDCD] border-b-[#CDCDCD] border-l-[#F2F2F2] rounded-[5px]" alt="avatar" />
+                    </Link>
+                  </td>
+                </tr>
+                <tr>
+                  <td className='pt-2'>
+                    <div className='space-x-2'>
+                      <strong className="text-black">积分: 4170</strong>
+                      <span>|</span>
+                      <a href="/settings" className="text-[#333]">用户组: 论坛元老</a>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
             </table>
           ) : (
             <AuthPage />

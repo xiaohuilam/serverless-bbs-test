@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Mail } from 'lucide-react';
@@ -42,7 +42,7 @@ const ProfileHeader = ({ user }: { user: UserInfo | null }) => {
                 <img src={avatarUrl} alt="avatar" className="w-12 h-12 rounded object-cover" />
                 <div className="ml-4">
                     <h1 className="text-xl font-bold text-gray-800">{user.username}</h1>
-                    <p className="text-sm text-gray-400">https://www.yourforum.net/?{user.id}</p>
+                    <p className="text-sm text-gray-400">{window.location.origin}/users/{user.id}</p>
                 </div>
             </div>
             <Button variant="outline" className="h-7 px-3 text-xs flex items-center space-x-1" onClick={handleSendMessage}>
