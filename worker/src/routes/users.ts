@@ -4,18 +4,14 @@ import type { Bindings, User } from '../types';
 
 const app = new Hono<{ Bindings: Bindings, Variables: { user: User } }>();
 
-// 所有路由都需要认证
-app.use('*', authMiddleware);
-
-// 获取当前登录用户的信息
-app.get('/me', (c) => {
-  const user = c.get('user');
-  return c.json(user);
-});
-
 // 获取指定用户的公开信息
 app.get('/:id', async (c) => {
   const id = c.req.param('id');
+  if (id == 'me') {
+    const user = c.get('user');
+    return c.json(user);
+  }
+
   try {
     const query = `
       SELECT
@@ -36,34 +32,34 @@ app.get('/:id', async (c) => {
     }
     // 模拟一些其他数据以匹配 UI
     const fullProfile = {
-        ...profile,
-        last_visit_at: Date.now() / 1000 - 3600, // 模拟1小时前访问
-        last_activity_at: Date.now() / 1000 - 1800,
-        last_post_at: Date.now() / 1000 - 900,
-        online_time: 1127,
-        user_group: '银牌会员',
-        silver_coins: (Number(profile.credits) || 0) * 0.8,
-        gold_coins: (Number(profile.credits) || 0) * 0.2,
+      ...profile,
+      last_visit_at: Date.now() / 1000 - 3600, // 模拟1小时前访问
+      last_activity_at: Date.now() / 1000 - 1800,
+      last_post_at: Date.now() / 1000 - 900,
+      online_time: 1127,
+      user_group: '银牌会员',
+      silver_coins: (Number(profile.credits) || 0) * 0.8,
+      gold_coins: (Number(profile.credits) || 0) * 0.2,
     };
 
     return c.json(fullProfile);
-  } catch(e) {
-      console.error(e);
-      return c.json({ error: 'Failed to fetch user profile '}, 500);
+  } catch (e) {
+    console.error(e);
+    return c.json({ error: 'Failed to fetch user profile ' }, 500);
   }
 });
 
 // 新增: 获取指定用户的所有主题帖
 app.get('/:id/threads', async (c) => {
-    const id = c.req.param('id');
-    try {
-        const user = await c.env.DB.prepare("SELECT id FROM Users WHERE id = ?").bind(id).first<{ id: string }>();
+  const id = c.req.param('id');
+  try {
+    const user = await c.env.DB.prepare("SELECT id FROM Users WHERE id = ?").bind(id).first<{ id: string }>();
 
-        if (!user) {
-            return c.json({ error: 'User not found' }, 404);
-        }
+    if (!user) {
+      return c.json({ error: 'User not found' }, 404);
+    }
 
-        const query = `
+    const query = `
             SELECT
                 t.id,
                 t.title,
@@ -77,13 +73,13 @@ app.get('/:id/threads', async (c) => {
             WHERE t.author_id = ?
             ORDER BY t.created_at DESC
         `;
-        const { results } = await c.env.DB.prepare(query).bind(user.id).all();
+    const { results } = await c.env.DB.prepare(query).bind(user.id).all();
 
-        return c.json(results);
-    } catch(e) {
-        console.error(e);
-        return c.json({ error: 'Failed to fetch user threads' }, 500);
-    }
+    return c.json(results);
+  } catch (e) {
+    console.error(e);
+    return c.json({ error: 'Failed to fetch user threads' }, 500);
+  }
 });
 
 // 所有路由都需要认证
@@ -91,31 +87,31 @@ app.use('*', authMiddleware);
 
 // 新增: 处理头像上传
 app.post('/me/avatar', async (c) => {
-    const user = c.get('user');
-    const formData = await c.req.formData();
-    const avatarFile = formData.get('avatar');
+  const user = c.get('user');
+  const formData = await c.req.formData();
+  const avatarFile = formData.get('avatar');
 
-    if (!avatarFile || !(avatarFile instanceof File)) {
-        return c.json({ error: 'No avatar file uploaded' }, 400);
-    }
-    
-    // 生成一个唯一的文件名
-    const avatarKey = `avatars/${user.id}/${crypto.randomUUID()}`;
+  if (!avatarFile || !(avatarFile instanceof File)) {
+    return c.json({ error: 'No avatar file uploaded' }, 400);
+  }
 
-    // 将 File 转为 ArrayBuffer
-    const arrayBuffer = await avatarFile.arrayBuffer();
+  // 生成一个唯一的文件名
+  const avatarKey = `avatars/${user.id}/${crypto.randomUUID()}`;
 
-    // 上传文件到 R2
-    await c.env.R2_BUCKET.put(avatarKey, arrayBuffer, {
-        httpMetadata: { contentType: avatarFile.type },
-    });
+  // 将 File 转为 ArrayBuffer
+  const arrayBuffer = await avatarFile.arrayBuffer();
 
-    // 更新用户在 D1 中的头像 key
-    await c.env.DB.prepare('UPDATE Users SET avatar = ? WHERE id = ?')
-        .bind(avatarKey, user.id)
-        .run();
+  // 上传文件到 R2
+  await c.env.R2_BUCKET.put(avatarKey, arrayBuffer, {
+    httpMetadata: { contentType: avatarFile.type },
+  });
 
-    return c.json({ message: 'Avatar updated successfully', avatarKey });
+  // 更新用户在 D1 中的头像 key
+  await c.env.DB.prepare('UPDATE Users SET avatar = ? WHERE id = ?')
+    .bind(avatarKey, user.id)
+    .run();
+
+  return c.json({ message: 'Avatar updated successfully', avatarKey });
 });
 
 export default app;

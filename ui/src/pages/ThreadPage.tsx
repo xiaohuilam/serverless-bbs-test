@@ -113,7 +113,7 @@ const Post = ({ post, isOp, floor, onQuote, onVoted }: { post: (ThreadWithDetail
                     <div>{isOp && <span className="mr-2">楼主</span>}<span className="font-bold text-lg">#{floor}</span></div>
                 </div>
 
-                <div className="prose prose-sm max-w-none text-base leading-relaxed" dangerouslySetInnerHTML={{ __html: post.body }} />
+                <div className="prose prose-sm max-w-none text-base leading-relaxed text-[14px]" dangerouslySetInnerHTML={{ __html: post.body }} />
 
                 {isOp && post.type === 'poll' && post.poll_options && onVoted && (
                     <PollComponent
@@ -224,7 +224,7 @@ export default function ThreadPage() {
                     <span className='text-[#F26C4F]'>54</span>
                 </div>
                 <div className="w-full px-2 py-3 bg-white" id="reply-3">
-                    <h1 className="font-bold break-words px-2">{thread.title}</h1>
+                    <h1 className="font-bold break-words px-2 text-[16px]">{thread.title}</h1>
                 </div>
             </div>
             <Post

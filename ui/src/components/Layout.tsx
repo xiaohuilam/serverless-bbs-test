@@ -7,6 +7,9 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import { Select, SelectContent, SelectTrigger, SelectValue } from './ui/select';
 import { SelectItem } from '@radix-ui/react-select';
 import { Search } from 'lucide-react';
+import AuthPage from '@/pages/AuthPage';
+import defaultAvatar from '@/img/default_avatar.svg';
+import { toast } from './ui/use-toast';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user, logout } = useAuth();
@@ -15,8 +18,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [searchType, setSearchType] = useState('threads');
 
   const handleSearch = () => {
-      if (!searchTerm.trim()) return;
-      navigate(`/search?q=${encodeURIComponent(searchTerm)}&type=${searchType}`);
+    if (!searchTerm.trim()) return;
+    navigate(`/search?q=${encodeURIComponent(searchTerm)}&type=${searchType}`);
   };
 
   const handleLogout = (e: React.MouseEvent) => {
@@ -26,30 +29,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F5F5F5]">
+    <div className="min-h-screen bg-white flex flex-col">
       {/* 顶部用户信息栏 */}
       <div className="bg-white border-b border-[#E5EDF2] text-xs">
-        <div className="max-w-[960px] mx-auto px-4 h-8 flex justify-end items-center space-x-4 text-[#666]">
-            {isAuthenticated && user ? (
-              <>
-                <strong className="text-black">{user.username}</strong>
-                <span>|</span>
-                <a href="/settings" className="hover:text-red-500">我的设置</a>
-                <span>|</span>
-                <a href="/notifications" className="hover:text-red-500">消息</a>
-                <span>|</span>
-                <a href="#" onClick={handleLogout} className="hover:text-red-500">退出</a>
-              </>
-            ) : (
-              <>
-                <a href="/auth" className="text-[#336699] hover:text-red-500">登录</a>
-                <span>|</span>
-                <a href="/auth" className="text-[#336699] hover:text-red-500">注册</a>
-              </>
-            )}
+        <div className="max-w-[960px] mx-auto h-8 flex justify-start items-center space-x-2 text-[#666]">
+          <a
+            href="/auth"
+            className="text-[#333]"
+            onClick={(e) => {
+              e.preventDefault();
+              toast({ title: "提示信息", description: "非 IE 浏览器请手动将本站设为首页" });
+            }}
+          >设为首页</a>
+          <a href="/auth" className="text-[#333]" onClick={(e) => {
+            e.preventDefault();
+            toast({ title: "提示信息", description: "请按 Ctrl+D 键添加到收藏夹" });
+          }}>收藏本站</a>
         </div>
       </div>
-      
+
       {/* 主 Logo 和搜索栏 */}
       <div className="bg-white py-4 shadow-sm">
         <div className="max-w-[960px] mx-auto flex justify-between items-center">
@@ -57,42 +55,98 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <h1 className="text-3xl font-bold text-[#336699] tracking-tighter">HOSTLOC.COM</h1>
             <p className="text-xs text-gray-400">全球主机交流</p>
           </Link>
-          {/* 更新后的搜索框 */}
-            <div className="flex items-center">
-                <Input 
-                    type="text" 
-                    placeholder="请输入搜索内容" 
-                    className="w-56 h-8 text-xs rounded-r-none border-gray-300 focus:border-gray-600"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                />
-                <Select value={searchType} onValueChange={setSearchType}>
-                    <SelectTrigger className="w-[70px] h-8 rounded-none text-xs border-x-0 border-gray-300">
-                        {searchType === 'threads' ? '帖子' : '用户'}
-                    </SelectTrigger>
-                    <SelectContent className='bg-white dark:bg-gray-800'>
-                        <SelectItem className='cursor-pointer' value="threads">帖子</SelectItem>
-                        <SelectItem className='cursor-pointer' value="users">用户</SelectItem>
-                    </SelectContent>
-                </Select>
-                <Button className="h-8 bg-[#336699] hover:bg-[#2366A8] rounded-l-none" onClick={handleSearch}>
-                    <Search className='w-[16px] text-white' />
-                </Button>
-            </div>
+          {isAuthenticated && user ? (
+            <table className='text-right space-y-3'>
+              <tr>
+                <td>
+                  <div className='space-x-2'>
+                    <strong className="text-black">{user.username}</strong> 在线
+                    <span>|</span>
+                    <a href="/settings" className="text-[#333]">我的设置</a>
+                    <span>|</span>
+                    <a href="/notifications" className="text-[#333]">消息</a>
+                    <span>|</span>
+                    <a href="#" onClick={handleLogout} className="text-[#333]">退出</a>
+                  </div>
+                </td>
+                <td rowSpan={2} className='pl-2'>
+                  <Link to={`/users/${user.id}`}>
+                    <img src={user.avatar ? user.avatar : defaultAvatar} className="mx-auto object-cover w-[48px] h-[48px] border-[2px] border-t-[#F2F2F2] border-r-[#CDCDCD] border-b-[#CDCDCD] border-l-[#F2F2F2] rounded-[5px]" alt="avatar" />
+                  </Link>
+                </td>
+              </tr>
+              <tr>
+                <td className='pt-2'>
+                  <div className='space-x-2'>
+                    <strong className="text-black">积分: 4170</strong>
+                    <span>|</span>
+                    <a href="/settings" className="text-[#333]">用户组: 论坛元老</a>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          ) : (
+            <AuthPage />
+          )}
+
         </div>
       </div>
 
       {/* 主导航 */}
       <div className="bg-[#2B7ACD] text-white shadow-inner">
-         <div className="max-w-[960px] mx-auto h-10 flex justify-between items-center">
-            <div className="flex items-center">
-                <Link to="/" className="h-10 font-bold text-sm bg-[#12406f] px-4 py-2 rounded-sm">论坛</Link>
-                <Link to="/rankings" className="h-10 font-bold text-sm hover:bg-[#12406f] px-4 py-2 rounded-sm">排行榜</Link>
-            </div>
-         </div>
+        <div className="max-w-[960px] mx-auto h-10 flex justify-between items-center">
+          <div className="flex items-center">
+            <Link to="/" className="h-10 font-bold text-sm text-white bg-[#12406f] px-4 py-2 rounded-sm">论坛</Link>
+            <Link to="/rankings" className="h-10 font-bold text-sm text-white hover:bg-[#12406f] px-4 py-2 rounded-sm">排行榜</Link>
+          </div>
+        </div>
       </div>
-      
+      <div className="max-w-[960px] mx-auto bg-[#e8eff5] p-2 px-4">
+        <div className="flex space-x-5">
+          <div className="flex">
+            <Input
+              type="text"
+              placeholder="请输入搜索内容"
+              className="w-56 h-8 text-xs rounded-r-none bg-white border-gray-300 focus:border-gray-600"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+            <Select value={searchType} onValueChange={setSearchType}>
+              <SelectTrigger className="w-[70px] h-8 rounded-none text-xs border-x-0 border-gray-300 bg-white">
+                {searchType === 'threads' ? '帖子' : '用户'}
+              </SelectTrigger>
+              <SelectContent className='bg-white dark:bg-gray-800'>
+                <SelectItem className='cursor-pointer' value="threads">帖子</SelectItem>
+                <SelectItem className='cursor-pointer' value="users">用户</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button className="h-8 bg-[#336699] hover:bg-[#2366A8] rounded-l-none" onClick={handleSearch}>
+              <Search className='w-[16px] text-white' />
+            </Button>
+          </div>
+          <div className='text-xs' style={{ width: '1000px' }}>
+            <b>热搜:</b>
+            <span className="text-[#369]">
+              香港vps
+              香港VPS
+              amh
+              机柜
+              vps
+              分销
+              VPS
+              域名出售
+              火车头
+              云主机
+              不限流量
+              香港服务器
+              美国服务器
+            </span>
+          </div>
+
+        </div>
+      </div>
+
       {/* 面包屑导航和公告区 */}
       <Breadcrumbs />
 
@@ -101,10 +155,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </main>
 
       <footer className="w-full mt-8">
-          <div className="max-w-[960px] mx-auto py-4 px-4 text-center text-xs text-[#666] border-t border-[#CDCDCD]">
-            <p>Powered by <a href="https://github.com/serverless-bbs/serverless-bbs" className='font-bold hover:underline hover:text-[#336699]' target="_blank">ServerlessDiscuz!</a></p>
-            <p className="mt-1">© 2004-2025 Thanks to Comsenz Inc, Cloudflare Inc...</p>
-          </div>
+        <div className="max-w-[960px] mx-auto py-4 px-4 text-center text-xs text-[#666] border-t border-[#CDCDCD]">
+          <p>Powered by <a href="https://github.com/serverless-bbs/serverless-bbs" className='font-bold hover:underline hover:text-[#336699]' target="_blank">ServerlessDiscuz!</a></p>
+          <p className="mt-1">
+            <span className='inline-block' style={{ transform: 'rotate(180deg)' }}>©</span>
+            2004-2025 Thanks to Comsenz Inc, Cloudflare Inc...</p>
+        </div>
       </footer>
     </div>
   );

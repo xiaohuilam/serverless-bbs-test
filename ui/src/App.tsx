@@ -28,7 +28,7 @@ function App() {
           <Route path="/nodes/:nodeId" element={<NodePage />} />
           <Route path="/threads/:threadId" element={<ThreadPage />} />
           <Route path="/new-thread/:nodeId" element={<PrivateRoute><NewThreadPage /></PrivateRoute>} />
-          <Route path="/auth" element={<AuthPage />} />
+          {/* <Route path="/auth" element={<AuthPage />} /> */}
           <Route path="/users/:username" element={<ProfilePage />} />
           {/* 2. 添加用户主题列表页的路由 */}
           <Route path="/users/:username/threads" element={<UserThreadsPage />} />

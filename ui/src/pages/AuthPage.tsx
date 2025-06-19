@@ -23,16 +23,16 @@ export default function AuthPage() {
     try {
       // 1. 从后端获取注册选项 (challenge)
       const regOptions = await apiClient.post('/auth/register/challenge', { username, email });
-      
+
       // 2. 使用浏览器 API 创建凭证
       const attestation = await startRegistration(regOptions);
 
       // 3. 将结果发送到后端进行验证
-      const verificationResponse = await apiClient.post<{verified: boolean, token: string}>(
-          '/auth/register/verify', 
-          { userId: regOptions.user.id, response: attestation }
+      const verificationResponse = await apiClient.post<{ verified: boolean, token: string }>(
+        '/auth/register/verify',
+        { userId: regOptions.user.id, response: attestation }
       );
-      
+
       if (verificationResponse.verified && verificationResponse.token) {
         toast({ title: "注册成功", description: "您已成功注册并登录。" });
         login(verificationResponse.token);
@@ -44,63 +44,72 @@ export default function AuthPage() {
       toast({ title: "注册失败", description: `${error}`, variant: "destructive" });
       console.error(error);
     } finally {
-        setIsRegistering(false);
+      setIsRegistering(false);
     }
   };
 
   // 登录 Passkey
   const handleLogin = async () => {
     try {
-        // 1. 从后端获取认证选项
-        const authOptions = await apiClient.post('/auth/login/challenge', {});
-        
-        // 2. 使用浏览器 API 获取断言
-        const assertion = await startAuthentication(authOptions);
+      // 1. 从后端获取认证选项
+      const authOptions = await apiClient.post('/auth/login/challenge', {});
 
-        // 3. 将结果发送到后端进行验证
-        const verificationResponse = await apiClient.post<{verified: boolean, token: string}>(
-            '/auth/login/verify',
-            assertion
-        );
+      // 2. 使用浏览器 API 获取断言
+      const assertion = await startAuthentication(authOptions);
 
-        if (verificationResponse.verified && verificationResponse.token) {
-            toast({ title: "登录成功", description: "欢迎回来！" });
-            login(verificationResponse.token);
-            navigate('/');
-        } else {
-            throw new Error('Login verification failed.');
-        }
+      // 3. 将结果发送到后端进行验证
+      const verificationResponse = await apiClient.post<{ verified: boolean, token: string }>(
+        '/auth/login/verify',
+        assertion
+      );
+
+      if (verificationResponse.verified && verificationResponse.token) {
+        toast({ title: "登录成功", description: "欢迎回来！" });
+        login(verificationResponse.token);
+        navigate('/');
+      } else {
+        throw new Error('Login verification failed.');
+      }
 
     } catch (error) {
-        toast({ title: "登录失败", description: `${error}`, variant: "destructive" });
-        console.error(error);
+      toast({ title: "登录失败", description: `${error}`, variant: "destructive" });
+      console.error(error);
     }
   };
 
   return (
-    <div className="container mx-auto p-4 flex justify-center items-center h-[80vh]">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>欢迎</CardTitle>
-          <CardDescription>使用 Passkey (面容ID/指纹/安全密钥) 安全地登录或注册。</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="username">用户名</Label>
-            <Input id="username" value={username} onChange={e => setUsername(e.target.value)} placeholder="输入您的用户名" />
-          </div>
-           <div className="space-y-2">
-            <Label htmlFor="email">邮箱</Label>
-            <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="输入您的邮箱" />
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
-          <Button onClick={handleRegister} className="w-full" disabled={!username || !email || isRegistering}>
-            {isRegistering ? '注册中...' : '注册新 Passkey'}
-          </Button>
-          <Button onClick={handleLogin} variant="outline" className="w-full">使用 Passkey 登录</Button>
-        </CardFooter>
-      </Card>
-    </div>
+    <table>
+      <tbody>
+        <tr>
+          <td className='border-r border-r-[#ccc] pr-4'>
+            <Button onClick={handleLogin} variant="default" className='rounded-[3px] w-[124px] h-[24px] text-xs'>使用 Passkey 登录</Button>
+          </td>
+          <td><Label className='font-normal text-xs pl-4' htmlFor="username">用户名</Label></td>
+          <td><Input className='h-[23px] w-[140px] text-[13px] focus:border-[#000] border-t-[#848484] border-r-[#E0E0E0] border-b-[#E0E0E0] border-l-[#848484]' style={{ boxShadow: 'inset 0 1px 1px #848484' }} id="username" value={username} onChange={e => setUsername(e.target.value)} placeholder="输入您的用户名" /></td>
+          <td>
+            <div className="flex">
+              <Input type="checkbox" id="ls_cookietime" className='w-[14px] h-[14px]'></Input>
+              <Label htmlFor="ls_cookietime" className='inline-block font-normal text-xs ml-1'>自动登录</Label>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td className='text-center text-gray-400 border-r border-r-[#ccc] pr-4'>只需一步，快速开始</td>
+          <td><Label className='font-normal text-xs pl-4' htmlFor="email">邮箱</Label></td>
+          <td><Input className='h-[23px] w-[140px] text-[13px] focus:border-[#000] border-t-[#848484] border-r-[#E0E0E0] border-b-[#E0E0E0] border-l-[#848484]' style={{ boxShadow: 'inset 0 1px 1px #848484' }}  id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="输入您的邮箱" /></td>
+          <td>
+            <Button onClick={handleRegister} variant="outline" className='w-[84px] h-[23px] text-xs border-[#999] rounded-none' style={{background: 'linear-gradient(0, #e2e2e2, #fcfdfd)'}} disabled={!username || !email || isRegistering}>
+              {isRegistering ? '注册中...' : 'Passkey 注册'}
+            </Button>
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   );
 }

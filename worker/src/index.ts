@@ -13,6 +13,7 @@ import reminders from './routes/reminders'; // 1. 引入新路由
 import search from './routes/search'; // 1. 引入新路由
 import rankings from './routes/rankings';
 import { tryAuthMiddleware } from './auth/tryAuthMiddleware';
+import { authMiddleware } from './auth/middleware';
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -55,7 +56,6 @@ app.get('/avatars/:key{.+$}', async (c) => {
     headers,
   });
 });
-
 
 app.route('/api', api);
 

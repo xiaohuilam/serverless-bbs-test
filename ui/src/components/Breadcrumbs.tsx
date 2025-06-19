@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { apiClient } from '@/lib/api';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Home } from 'lucide-react';
 
 // 定义面包屑每一项的类型
 interface Crumb {
@@ -73,8 +73,10 @@ export default function Breadcrumbs() {
     }
 
     return (
-        <div className="max-w-[960px] mx-auto w-full mt-4">
-            <div className="text-sm text-gray-500 mb-2 flex items-center space-x-2">
+        <div className="max-w-[960px] mx-auto w-full mt-2">
+            <div className="text-xs text-gray-500 mb-2 flex items-center space-x-1">
+                <Home className='w-[15px]' />
+                <ChevronRight size={14} className="text-gray-400" />
                 {crumbs.map((crumb, index) => (
                     <React.Fragment key={index}>
                         {index > 0 && <ChevronRight size={14} className="text-gray-400" />}
