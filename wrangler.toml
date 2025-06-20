@@ -9,10 +9,9 @@ compatibility_flags = [ "nodejs_compat" ]
 # The auth code uses these to configure Passkeys correctly.
 [vars]
 RP_NAME = "Community Board"
-# IMPORTANT: In production, change RP_ID and ORIGIN to your actual domain.
+RP_SUBTITLE = "An opensource-friendly forum"
 RP_ID = "localhost"
-ORIGIN = "http://localhost:5173" # Default for Vite dev server
-# R2_PUBLIC_URL = "https://pub-xxxxxxxx.r2.dev"
+ORIGIN = "http://localhost:5173"
 R2_PUBLIC_URL = "http://localhost:8787/r2" 
 
 # [dev]

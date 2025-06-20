@@ -13,6 +13,7 @@ import reminders from './routes/reminders';
 import search from './routes/search';
 import rankings from './routes/rankings';
 import images from './routes/images';
+import config from './routes/config';
 import { tryAuthMiddleware } from './auth/tryAuthMiddleware';
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -39,6 +40,7 @@ api.route('/reminders', reminders);
 api.route('/search', search);
 api.route('/rankings', rankings);
 api.route('/images', images);
+api.route('/config', config);
 
 app.get('/r2/:key{.+$}', async (c) => {
   const key = c.req.param('key');

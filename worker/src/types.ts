@@ -6,6 +6,7 @@ export type Bindings = {
   KV_SESSIONS: KVNamespace;
   R2_BUCKET: R2Bucket;
   RP_NAME: string;
+  RP_SUBTITLE: string;
   RP_ID: string;
   ORIGIN: string;
   R2_PUBLIC_URL: string;

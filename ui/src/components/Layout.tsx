@@ -10,12 +10,14 @@ import { Search } from 'lucide-react';
 import AuthPage from '@/pages/AuthPage';
 import defaultAvatar from '@/img/default_avatar.svg';
 import { toast } from './ui/use-toast';
+import { useConfig } from '@/contexts/ConfigContext';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchType, setSearchType] = useState('threads');
+  const { rpName, rpSubtitle } = useConfig(); // 2. 从 context 获取论坛名称
 
   const handleSearch = () => {
     if (!searchTerm.trim()) return;
@@ -52,8 +54,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="bg-white py-4 shadow-sm">
         <div className="max-w-[960px] mx-auto flex justify-between items-center">
           <Link to="/" className="flex-shrink-0">
-            <h1 className="text-3xl font-bold text-[#336699] tracking-tighter">HOSTLOC.COM</h1>
-            <p className="text-xs text-gray-400">全球主机交流</p>
+            <h1 className="text-3xl font-bold text-[#336699] tracking-tighter">{rpName}</h1>
+            <p className="text-xs text-gray-400">{rpSubtitle}</p>
           </Link>
           {isAuthenticated && user ? (
             <table className='text-right space-y-3'>
