@@ -8,12 +8,12 @@ import nodes from './routes/nodes';
 import threads from './routes/threads';
 import comments from './routes/comments';
 import users from './routes/users';
-import messages from './routes/messages'; // 1. 引入新的路由
-import reminders from './routes/reminders'; // 1. 引入新路由
-import search from './routes/search'; // 1. 引入新路由
+import messages from './routes/messages';
+import reminders from './routes/reminders';
+import search from './routes/search';
 import rankings from './routes/rankings';
+import images from './routes/images';
 import { tryAuthMiddleware } from './auth/tryAuthMiddleware';
-import { authMiddleware } from './auth/middleware';
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -33,13 +33,14 @@ api.route('/nodes', nodes);
 api.route('/threads', threads);
 api.route('/comments', comments);
 api.route('/users', users);
-api.route('/messages', messages); // 2. 挂载私信路由
 api.route('/messages', messages);
-api.route('/reminders', reminders); // 2. 挂载新路由
+api.route('/messages', messages);
+api.route('/reminders', reminders);
 api.route('/search', search);
-api.route('/rankings', rankings); // 2. 挂载排行榜路由
+api.route('/rankings', rankings);
+api.route('/images', images);
 
-app.get('/avatars/:key{.+$}', async (c) => {
+app.get('/r2/:key{.+$}', async (c) => {
   const key = c.req.param('key');
   const object = await c.env.R2_BUCKET.get(key);
 

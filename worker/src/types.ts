@@ -8,6 +8,7 @@ export type Bindings = {
   RP_NAME: string;
   RP_ID: string;
   ORIGIN: string;
+  R2_PUBLIC_URL: string;
 };
 
 // User-related types

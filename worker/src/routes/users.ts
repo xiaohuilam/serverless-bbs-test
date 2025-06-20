@@ -106,12 +106,14 @@ app.post('/me/avatar', async (c) => {
     httpMetadata: { contentType: avatarFile.type },
   });
 
+  const avatarUrl = `${c.env.R2_PUBLIC_URL}/${avatarKey}`;
+
   // 更新用户在 D1 中的头像 key
   await c.env.DB.prepare('UPDATE Users SET avatar = ? WHERE id = ?')
-    .bind(avatarKey, user.id)
+    .bind(avatarUrl, user.id)
     .run();
 
-  return c.json({ message: 'Avatar updated successfully', avatarKey });
+  return c.json({ message: 'Avatar updated successfully', avatarUrl });
 });
 
 export default app;

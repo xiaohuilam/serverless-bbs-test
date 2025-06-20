@@ -40,7 +40,7 @@ app.get('/', zValidator('query', listThreadsSchema), async (c) => {
 // 创建一个新帖子
 const createThreadSchema = z.object({
   nodeId: z.number(),
-  title: z.string().min(5),
+  title: z.string().min(2),
   body: z.string().min(10),
   type: z.enum(['discussion', 'poll']),
   readPermission: z.number().int().min(0),
