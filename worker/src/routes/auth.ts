@@ -9,7 +9,7 @@ import {
 } from '@simplewebauthn/server';
 import type { RegistrationResponseJSON, AuthenticationResponseJSON } from '@simplewebauthn/types';
 
-import type { Bindings, Passkey, User } from '../types';
+import type { Bindings, Passkey } from '../types';
 import { getOrCreateUser, getUserPasskeys, getPasskeyById } from '../lib/passkeys';
 
 // Extend the Hono Bindings type to include the variables from wrangler.toml
@@ -25,12 +25,12 @@ const app = new Hono<{ Bindings: AuthBindings }>();
 const registerChallengeSchema = z.object({
   username: z.string().min(3).max(50),
   email: z.string().email(),
+//   rpID: z.string().min(5).max(128),
 });
 
 app.post('/register/challenge', zValidator('json', registerChallengeSchema), async (c) => {
   const { username, email } = c.req.valid('json');
   const { RP_NAME, RP_ID } = c.env;
-  
   const user = await getOrCreateUser(c.env.DB, username, email);
   const userPasskeys = await getUserPasskeys(c.env.DB, user.id);
 
@@ -104,7 +104,7 @@ app.post('/register/verify', async (c) => {
 
         const newPasskey: Omit<Passkey, 'user_id' | 'created_at'> = {
             id: credentialID,
-            pubkey_blob: credentialPublicKey,
+            pubkey_blob: <any> credentialPublicKey,
             sign_counter: counter,
         };
 
@@ -126,10 +126,11 @@ app.post('/register/verify', async (c) => {
     return c.json({ verified: false }, 400);
 });
 
-app.post('/login/challenge', async (c) => {
-    const { RP_ID } = c.env;
+const loginChallengeSchema = z.object({ });
+app.post('/login/challenge', zValidator('json', loginChallengeSchema), async (c) => {
+    // const { rpID } = c.req.valid('json');
     const options = await generateAuthenticationOptions({
-        rpID: RP_ID,
+        rpID: c.env.RP_ID,
         userVerification: 'preferred',
     });
 

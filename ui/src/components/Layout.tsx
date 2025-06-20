@@ -36,14 +36,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="bg-white border-b border-[#E5EDF2] text-xs">
         <div className="max-w-[960px] mx-auto h-8 flex justify-start items-center space-x-2 text-[#666]">
           <a
-            href="/auth"
+            href="#"
             className="text-[#333]"
             onClick={(e) => {
               e.preventDefault();
               toast({ title: "提示信息", description: "非 IE 浏览器请手动将本站设为首页" });
             }}
           >设为首页</a>
-          <a href="/auth" className="text-[#333]" onClick={(e) => {
+          <a href="#" className="text-[#333]" onClick={(e) => {
             e.preventDefault();
             toast({ title: "提示信息", description: "请按 Ctrl+D 键添加到收藏夹" });
           }}>收藏本站</a>
@@ -65,9 +65,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <div className='space-x-2'>
                       <strong className="text-black">{user.username}</strong> 在线
                       <span>|</span>
-                      <a href="/settings" className="text-[#333]">我的设置</a>
+                      <Link to="/settings" className="text-[#333]">我的设置</Link>
                       <span>|</span>
-                      <a href="/notifications" className="text-[#333]">消息</a>
+                      <Link to="/notifications" className="text-[#333]">消息</Link>
                       <span>|</span>
                       <a href="#" onClick={handleLogout} className="text-[#333]">退出</a>
                     </div>
@@ -83,7 +83,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <div className='space-x-2'>
                       <strong className="text-black">积分: 4170</strong>
                       <span>|</span>
-                      <a href="/settings" className="text-[#333]">用户组: 论坛元老</a>
+                      <a href="#" className="text-[#333]">用户组: 论坛元老</a>
                     </div>
                   </td>
                 </tr>
@@ -97,11 +97,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* 主导航 */}
-      <div className="bg-[#2B7ACD] text-white shadow-inner">
-        <div className="max-w-[960px] mx-auto h-10 flex justify-between items-center">
+      <div className="bg-[#2B7ACD] text-white shadow-inner" style={{background: 'linear-gradient(180deg, #2f80d1, #3f8ed6 2px, #3585d3 3px, #235994)'}}>
+        <div className="max-w-[960px] mx-auto h-[33px] flex justify-between items-center">
           <div className="flex items-center">
-            <Link to="/" className="h-10 font-bold text-sm text-white bg-[#12406f] px-4 py-2 rounded-sm">论坛</Link>
-            <Link to="/rankings" className="h-10 font-bold text-sm text-white hover:bg-[#12406f] px-4 py-2 rounded-sm">排行榜</Link>
+            <Link to="/" className="h-[33px] font-bold text-sm text-white bg-[#12406f] px-4 py-2">
+              论坛
+              <div className='w-[20px] h-[3px] bg-white mt-[5px] mx-auto' style={{boxShadow: '0 -6px 9px #fff'}}></div>
+            </Link>
+            <Link to="/rankings" className="h-[33px] font-bold text-sm text-white hover:bg-[#12406f] px-4 py-2">排行榜</Link>
           </div>
         </div>
       </div>

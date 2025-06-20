@@ -78,19 +78,19 @@ export default function IndexPage() {
                 </div>
                 <div className="flex-grow">
                   <h3 className="text-sm">
-                    <Link to={`/nodes/${child.id}`} className="text-[#336699] font-bold hover:underline">{child.name}</Link>
+                    <Link to={`/nodes/${child.id}`} className="text-[#333] text-sm font-bold hover:underline">{child.name}</Link>
                     {child.thread_count > 0 && <span className="text-red-500 font-normal text-xs ml-1">(今日: {Math.floor(child.thread_count / 10)})</span>}
                   </h3>
-                  <div className="text-xs text-[#999] mt-1">
-                    <span>主题: <span className="text-[#336699]">{child.thread_count}</span>,</span>
-                    <span className="ml-2">帖数: <span className="text-[#336699]">{child.reply_count}</span></span>
+                  <div className="text-xs text-[#333] mt-1">
+                    <span>主题: <span className="">{child.thread_count}</span>,</span>
+                    <span className="ml-2">帖数: <span className="">{child.reply_count}</span></span>
                   </div>
-                  <div className="text-xs text-[#999] mt-1 whitespace-nowrap overflow-hidden text-ellipsis">
+                  <div className="text-xs text-[#333] mt-1 whitespace-nowrap overflow-hidden text-ellipsis">
                     最后发表:
                     {child.last_post_title ? (
                       <>
-                        <Link to={`/threads/${child.last_post_thread_id}`} className="text-[#336699] ml-1">{child.last_post_title.substring(0, 18) + '...'}</Link>
-                        {child.last_post_time && <span className="text-gray-400 ml-2">{format(new Date(child.last_post_time * 1000), 'yyyy-MM-dd')}</span>}
+                        <Link to={`/threads/${child.last_post_thread_id}`} className="text-[#333] ml-1">{child.last_post_title.substring(0, 18) + '...'}</Link>
+                        {child.last_post_time && <span className="ml-2">{format(new Date(child.last_post_time * 1000), 'yyyy-MM-dd')}</span>}
                       </>
                     ) : (
                       <span className="ml-1">从未</span>

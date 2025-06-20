@@ -7,7 +7,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -82,10 +81,10 @@ export default function AuthPage() {
       <tbody>
         <tr>
           <td className='border-r border-r-[#ccc] pr-4'>
-            <Button onClick={handleLogin} variant="default" className='rounded-[3px] w-[124px] h-[24px] text-xs'>使用 Passkey 登录</Button>
+            <Button onClick={handleLogin} variant="default" className='rounded-[3px] px-2 h-[24px] text-xs'>Passkey 登录</Button>
           </td>
           <td><Label className='font-normal text-xs pl-4' htmlFor="username">用户名</Label></td>
-          <td><Input className='h-[23px] w-[140px] text-[13px] focus:border-[#000] border-t-[#848484] border-r-[#E0E0E0] border-b-[#E0E0E0] border-l-[#848484]' style={{ boxShadow: 'inset 0 1px 1px #848484' }} id="username" value={username} onChange={e => setUsername(e.target.value)} placeholder="输入您的用户名" /></td>
+          <td><Input className='h-[23px] w-[140px] text-[13px] px-[5px] focus:border-[#000] border-t-[#848484] border-r-[#E0E0E0] border-b-[#E0E0E0] border-l-[#848484]' style={{ boxShadow: 'inset 0 1px 1px #848484' }} id="username" value={username} onChange={e => setUsername(e.target.value)} placeholder="输入您的用户名" /></td>
           <td>
             <div className="flex">
               <Input type="checkbox" id="ls_cookietime" className='w-[14px] h-[14px]'></Input>
@@ -96,7 +95,7 @@ export default function AuthPage() {
         <tr>
           <td className='text-center text-gray-400 border-r border-r-[#ccc] pr-4'>只需一步，快速开始</td>
           <td><Label className='font-normal text-xs pl-4' htmlFor="email">邮箱</Label></td>
-          <td><Input className='h-[23px] w-[140px] text-[13px] focus:border-[#000] border-t-[#848484] border-r-[#E0E0E0] border-b-[#E0E0E0] border-l-[#848484]' style={{ boxShadow: 'inset 0 1px 1px #848484' }}  id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="输入您的邮箱" /></td>
+          <td><Input className='h-[23px] w-[140px] text-[13px] px-[5px] focus:border-[#000] border-t-[#848484] border-r-[#E0E0E0] border-b-[#E0E0E0] border-l-[#848484]' style={{ boxShadow: 'inset 0 1px 1px #848484' }}  id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="输入您的邮箱" /></td>
           <td>
             <Button onClick={handleRegister} variant="outline" className='w-[84px] h-[23px] text-xs border-[#999] rounded-none' style={{background: 'linear-gradient(0, #e2e2e2, #fcfdfd)'}} disabled={!username || !email || isRegistering}>
               {isRegistering ? '注册中...' : 'Passkey 注册'}

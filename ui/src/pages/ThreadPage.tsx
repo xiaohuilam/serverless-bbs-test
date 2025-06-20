@@ -174,7 +174,6 @@ const QuickReplyForm = ({ threadId, onReplyPosted, quotingReply, clearQuoting }:
     );
 };
 
-
 // --- 主页面组件 ---
 export default function ThreadPage() {
     const { threadId } = useParams<{ threadId: string }>();
