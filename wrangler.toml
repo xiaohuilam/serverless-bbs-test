@@ -10,10 +10,11 @@ compatibility_flags = [ "nodejs_compat" ]
 [vars]
 RP_NAME = "Community Board"
 RP_SUBTITLE = "An opensource-friendly forum"
-RP_ID = "serverless-bbs.pages.dev"
-ORIGIN = "https://serverless-bbs.pages.dev"
+RP_ID = "serverless-bbs.anquanssl.com"
+ORIGIN = "https://serverless-bbs.anquanssl.com"
 R2_PUBLIC_URL = "https://pub-610f99178b7e4cfb9e2fea44c1488cae.r2.dev"
-API_WORKER_URL = "https://community-board.dbgss.workers.dev"
+API_WORKER_URL = "https://serverless-bbs-api.anquanssl.com"
+REGISTER_ENABLED = false
 
 # [dev]
 # This block configures the local development server (`wrangler dev`).

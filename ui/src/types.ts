@@ -9,6 +9,7 @@ export type Bindings = {
   RP_SUBTITLE: string;
   RP_ID: string;
   ORIGIN: string;
+  REGISTER_ENABLED: boolean;
   R2_PUBLIC_URL: string;
   API_WORKER_URL: string;
 };
