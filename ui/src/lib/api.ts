@@ -1,6 +1,6 @@
 import { toast } from "@/components/ui/use-toast";
 
-const API_BASE_URL = '/api'; // Vite 代理会处理这个
+const API_BASE_URL = `${import.meta.env.API_WORKER_URL}/api`; // Vite 代理会处理这个
 
 class ApiClient {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -13,6 +13,7 @@ class ApiClient {
         headers.set('Content-Type', 'application/json');
     }
 
+  console.log(`${API_BASE_URL}${endpoint}`);
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers,

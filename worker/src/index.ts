@@ -20,7 +20,7 @@ const app = new Hono<{ Bindings: Bindings }>();
 
 app.use('*', logger());
 app.use('/api/*', cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:8788'],
+  origin: ['http://localhost:5173', 'http://127.0.0.1:8788', 'https://serverless-bbs.pages.dev', 'https://*.serverless-bbs.pages.dev'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
 }));

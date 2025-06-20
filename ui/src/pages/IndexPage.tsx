@@ -42,6 +42,9 @@ export default function IndexPage() {
   const nodeTree: Record<string, { parent: Node; children: Node[] }> = {};
   const parentNodes: Node[] = [];
 
+  if (!nodes || !nodes.length) {
+    return <div>Empty</div>
+  }
   nodes.forEach(node => {
     if (!node.parent_node_id) {
       parentNodes.push(node);

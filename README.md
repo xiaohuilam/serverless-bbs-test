@@ -2,6 +2,8 @@
 
 纯基于 Cloudflare Worker + Pages 的类似 Discuz!3.5 程序.
 
+**演示:** [https://serverless-bbs.pages.dev](https://serverless-bbs.pages.dev)
+
 ## 克隆代码
 ```bash
 git clone https://github.com/serverless-bbs/serverless-bbs.git

@@ -99,6 +99,9 @@ const AvatarPanel = () => {
 // 个人资料面板
 const ProfilePanel = () => {
     const { user } = useAuth();
+    if (!user) {
+        return <> </>;
+    }
     // 辅助组件
     const FormRow = ({ label, children, isPublicSelector = true }: { label: string, children: React.ReactNode, isPublicSelector?: boolean }) => (
         <div className="flex items-center py-3">

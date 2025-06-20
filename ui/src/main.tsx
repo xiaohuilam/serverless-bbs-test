@@ -9,7 +9,7 @@ import { ConfigProvider } from './contexts/ConfigContext'
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <AuthProvider>
-      <ConfigProvider> {/* 2. 用 ConfigProvider 包裹 App */}
+      <ConfigProvider>
         <App />
       </ConfigProvider>
       <Toaster />

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from "@/components/ui/use-toast";
 import { format } from 'date-fns';
 import { RichTextEditor } from '@/components/RichTextEditor';
-import type { ThreadWithDetails, PollOption, UserVote, Reply } from '../../types'; // 从共享类型导入
+import type { ThreadWithDetails, PollOption, UserVote, Reply } from '../types'; // 从共享类型导入
 import defaultAvatar from '@/img/default_avatar.svg';
 import { Mail } from 'lucide-react';
 
@@ -78,7 +78,7 @@ const PollComponent = ({ threadId, options, userVote, onVoted }: { threadId: num
     );
 };
 
-const Post = ({ post, isOp, floor, onQuote, onVoted }: { post: (ThreadWithDetails | Reply) & { author_username: string, author_avatar?: string, body: string, created_at: number }, isOp?: boolean, floor: number, onQuote: () => void, onVoted?: () => void }) => {
+const Post = ({ post, isOp, floor, onQuote, onVoted }: { post: (any | ThreadWithDetails | Reply) & { author_username: string, author_avatar?: string, body: string, created_at: number }, isOp?: boolean, floor: number, onQuote: () => void, onVoted?: () => void }) => {
     const navigate = useNavigate();
     const handleSendMessage = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -138,7 +138,7 @@ const Post = ({ post, isOp, floor, onQuote, onVoted }: { post: (ThreadWithDetail
     );
 };
 
-const QuickReplyForm = ({ threadId, onReplyPosted, quotingReply, clearQuoting }: { threadId: string, onReplyPosted: () => void, quotingReply: Reply | null, clearQuoting: () => void }) => {
+const QuickReplyForm = ({ threadId, onReplyPosted, quotingReply, clearQuoting }: { threadId: string, onReplyPosted: () => void, quotingReply: any | Reply | null, clearQuoting: () => void }) => {
     const { isAuthenticated, user } = useAuth();
     const [body, setBody] = useState('');
     const { toast } = useToast();

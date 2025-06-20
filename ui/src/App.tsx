@@ -12,6 +12,7 @@ import UserThreadsPage from './pages/UserThreadsPage'; // 1. 引入新页面
 import { useAuth } from './hooks/useAuth';
 import SearchPage from './pages/SearchPage';
 import RankingsPage from './pages/RankingsPage';
+import { ConfigProvider } from './contexts/ConfigContext';
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -22,22 +23,23 @@ function PrivateRoute({ children }: { children: JSX.Element }) {
 function App() {
   return (
     <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<IndexPage />} />
-          <Route path="/nodes/:nodeId" element={<NodePage />} />
-          <Route path="/threads/:threadId" element={<ThreadPage />} />
-          <Route path="/new-thread/:nodeId" element={<PrivateRoute><NewThreadPage /></PrivateRoute>} />
-          {/* <Route path="/auth" element={<AuthPage />} /> */}
-          <Route path="/users/:username" element={<ProfilePage />} />
-          {/* 2. 添加用户主题列表页的路由 */}
-          <Route path="/users/:username/threads" element={<UserThreadsPage />} />
-          <Route path="/settings" element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
-          <Route path="/notifications" element={<PrivateRoute><NotificationsPage /></PrivateRoute>} />
-          <Route path="/search" element={<SearchPage />} /> {/* 2. 添加搜索结果页的路由 */}
-          <Route path="/rankings" element={<RankingsPage />} /> {/* 2. 添加排行榜页面的路由 */}
-        </Routes>
-      </Layout>
+      <ConfigProvider>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<IndexPage />} />
+            <Route path="/nodes/:nodeId" element={<NodePage />} />
+            <Route path="/threads/:threadId" element={<ThreadPage />} />
+            <Route path="/new-thread/:nodeId" element={<PrivateRoute><NewThreadPage /></PrivateRoute>} />
+            <Route path="/users/:username" element={<ProfilePage />} />
+            {/* 2. 添加用户主题列表页的路由 */}
+            <Route path="/users/:username/threads" element={<UserThreadsPage />} />
+            <Route path="/settings" element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
+            <Route path="/notifications" element={<PrivateRoute><NotificationsPage /></PrivateRoute>} />
+            <Route path="/search" element={<SearchPage />} /> {/* 2. 添加搜索结果页的路由 */}
+            <Route path="/rankings" element={<RankingsPage />} /> {/* 2. 添加排行榜页面的路由 */}
+          </Routes>
+        </Layout>
+      </ConfigProvider>
     </Router>
   );
 }

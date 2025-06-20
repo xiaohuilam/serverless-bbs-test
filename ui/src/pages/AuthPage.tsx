@@ -22,7 +22,7 @@ export default function AuthPage() {
     setIsRegistering(true);
     try {
       // 1. 从后端获取注册选项 (challenge)
-      const regOptions = await apiClient.post('/auth/register/challenge', { username, email });
+      const regOptions = await apiClient.post('/auth/register/challenge', { username, email }) as any;
 
       // 2. 使用浏览器 API 创建凭证
       const attestation = await startRegistration(regOptions);
@@ -52,7 +52,7 @@ export default function AuthPage() {
   const handleLogin = async () => {
     try {
       // 1. 从后端获取认证选项
-      const authOptions = await apiClient.post('/auth/login/challenge', {});
+      const authOptions = await apiClient.post('/auth/login/challenge', {}) as any;
 
       // 2. 使用浏览器 API 获取断言
       const assertion = await startAuthentication(authOptions);

@@ -10,9 +10,10 @@ compatibility_flags = [ "nodejs_compat" ]
 [vars]
 RP_NAME = "Community Board"
 RP_SUBTITLE = "An opensource-friendly forum"
-RP_ID = "localhost"
-ORIGIN = "http://localhost:5173"
-R2_PUBLIC_URL = "http://localhost:8787/r2" 
+RP_ID = "serverless-bbs.pages.dev"
+ORIGIN = "https://serverless-bbs.pages.dev"
+R2_PUBLIC_URL = "https://pub-610f99178b7e4cfb9e2fea44c1488cae.r2.dev"
+API_WORKER_URL = "https://community-board.dbgss.workers.dev"
 
 # [dev]
 # This block configures the local development server (`wrangler dev`).
@@ -28,18 +29,25 @@ bucket = "./ui/dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "community-db"
-database_id = "your-d1-database-id" # !!! 重要: 请用你自己的 D1 数据库 ID 替换这里
+database_id = "3533d88d-593b-4137-ae4a-e19a28970dbd"
 migrations_dir = "worker/migrations"
 
 # KV Namespace 绑定.
 [[kv_namespaces]]
 binding = "KV_SESSIONS"
-id = "your-kv-sessions-id" # !!! 重要: 请用你自己的 KV Namespace ID 替换这里
-preview_id = "your-kv-sessions-preview-id" # !!! 重要: 请用你自己的 KV 预览 ID 替换这里
+id = "5238ba5971a947afa77850d7c75bfc24"
 
 # R2 Bucket 绑定.
 [[r2_buckets]]
 binding = "R2_BUCKET"
 bucket_name = "community-assets"
-preview_bucket_name = "community-assets-preview"
 
+[env.dev]
+
+[env.dev.vars]
+RP_NAME = "开发版论坛"
+RP_SUBTITLE = "本地测试环境"
+RP_ID = "localhost"
+ORIGIN = "//localhost:5173"
+R2_PUBLIC_URL = "//localhost:8787/r2"
+API_WORKER_URL = "//localhost:8787"

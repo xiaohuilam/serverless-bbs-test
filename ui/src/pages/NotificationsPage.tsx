@@ -8,6 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import defaultAvatar from '@/img/default_avatar.svg';
 import { BadgeInfo, Mail } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 // --- 类型定义 ---
 type NavItem = 'messages' | 'reminders';
@@ -171,8 +172,12 @@ const NewMessageView = ({ recipient, onSent, onBack }: { recipient: string, onSe
     const [body, setBody] = useState('');
     const [recipientName, setRecipientName] = useState(recipient);
     const handleSendMessage = async () => {
-        await apiClient.post('/messages', { recipientUsername: recipientName, body });
-        onSent();
+        try {
+            await apiClient.post('/messages', { recipientUsername: recipientName, body });
+            onSent();
+        } catch (error) {
+            toast({ title: "提示信息", description: `发送出错` });
+        }
     };
     return (
         <div className="p-6">
