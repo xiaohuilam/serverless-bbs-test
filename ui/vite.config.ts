@@ -2,9 +2,8 @@ import path from "path"
 import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 import fs from 'fs'
-import toml from 'toml'
 
-const wranglerConfig = toml.parse(fs.readFileSync('../wrangler.toml', 'utf-8'));
+const wranglerConfig = JSON.parse(fs.readFileSync('../wrangler.jsonc', 'utf-8'));
 const apiWorkerUrl = wranglerConfig.vars.API_WORKER_URL;
 
 export default defineConfig(({ command }) => {
