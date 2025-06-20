@@ -2,7 +2,7 @@
 
 纯基于 Cloudflare Worker + Pages 的类似 Discuz!3.5 程序.
 
-**演示:** [https://serverless-bbs.pages.dev](https://serverless-bbs.pages.dev)
+**演示:** [https://serverless-bbs.anquanssl.com](https://serverless-bbs.anquanssl.com)
 
 ## 克隆代码
 ```bash
