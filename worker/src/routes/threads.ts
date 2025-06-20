@@ -82,7 +82,7 @@ app.get('/:id', async (c) => {
     const user = c.get('user');
 
     try {        
-        const thread = await db.prepare(`SELECT t.*, u.username as author_username, u.avatar, u.level as author_level FROM Threads t JOIN Users u ON t.author_id = u.id WHERE t.id = ?`).bind(threadId).first<any>();
+        const thread = await db.prepare(`SELECT t.*, u.username as author_username, u.avatar as author_avatar, u.level as author_level FROM Threads t JOIN Users u ON t.author_id = u.id WHERE t.id = ?`).bind(threadId).first<any>();
         if (!thread) return c.json({ error: '帖子未找到' }, 404);
         
         // 权限检查
@@ -105,7 +105,7 @@ app.get('/:id', async (c) => {
         }
 
         const repliesQuery = `
-            SELECT r.*, u.username as author_username, qr.body as quoted_body, qu.username as quoted_author, qr.created_at as quoted_created_at
+            SELECT r.*, u.username as author_username, u.avatar as author_avatar, qr.body as quoted_body, qu.username as quoted_author, qr.created_at as quoted_created_at
             FROM Replies r
             JOIN Users u ON r.author_id = u.id
             LEFT JOIN Replies qr ON r.reply_to_id = qr.id
