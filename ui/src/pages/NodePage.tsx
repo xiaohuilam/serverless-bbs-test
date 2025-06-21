@@ -74,27 +74,27 @@ export default function NodePage() {
 
       <div className="bg-white border border-[#CDCDCD] rounded-sm">
         <div className="bg-[#F5FAFE] border-b border-[#E5EDF2] px-4 py-2 flex text-sm font-bold text-gray-600">
-          <div className="w-full">标题</div>
-          <div className="w-32 shrink-0 text-center">作者</div>
+          <div className="w-full pl-4">标题</div>
+          <div className="w-32 shrink-0 text-left">作者</div>
           <div className="w-24 shrink-0 text-center">回复/查看</div>
           <div className="w-40 shrink-0 text-right">最后发表</div>
         </div>
 
         <div className="divide-y divide-[#E5EDF2]">
           {threads.map(thread => (
-            <div key={thread.id} className="p-3 flex items-center text-sm">
+            <div key={thread.id} className="p-1 flex items-center text-sm">
               <div className="w-full flex items-center">
                 {
                   thread.is_pinned ? 
-                  <Lightbulb className='mr-2 text-gray-300' />
+                  <Lightbulb className='mr-1 h-[18px] text-gray-300' />
                   :
-                  <File className='mr-2 text-gray-300' />
+                  <File className='mr-1 h-[18px] text-gray-300' />
                 }
                 <Link to={`/threads/${thread.id}`} className="text-black hover:text-[#336699] hover:underline">
                   {thread.title}
                 </Link>
               </div>
-              <div className="w-32 shrink-0 text-center text-xs">
+              <div className="w-32 shrink-0 text-left text-xs">
                 <Link to={`/users/${thread.author_id}`} className="text-[#336699]">{thread.author_username}</Link>
                 <Link to={`/threads/${thread.id}`} className="block text-gray-400 hover:underline">{formatDistanceToNow(new Date(thread.created_at * 1000), { addSuffix: true, locale: zhCN })}</Link>
               </div>

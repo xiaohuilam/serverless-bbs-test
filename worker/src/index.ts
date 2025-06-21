@@ -29,6 +29,37 @@ const api = new Hono();
 
 app.use('*', tryAuthMiddleware);
 
+app.get('/', async (c) => {
+  const headers = new (globalThis as any).Headers();
+  headers.set('Content-Type', `text/html; charset=utf-8`);
+  const html = `<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>API 说明</title>
+</head>
+<body>
+  此地址为API地址，您还需要打包部署前端页面，<br/>请修改 <kbd>wrangler.jsonc</kbd> 中的
+<pre>
+{
+  "vars": {
+    "RP_ID": "<span class='x'></span>",
+    "ORIGIN": "https://<span class='x'></span>",
+  }
+}</pre>
+后再执行 <kbd>yarn deploy</kbd> 部署到 Pages。详细部署教程见：<a href="https://github.com/serverless-bbs/serverless-bbs/blob/master/%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97.md">部署指南.md</a>
+<script>
+document.querySelectorAll('.x').forEach(e => e.innerHTML = location.hostname)
+</script>
+</body>
+</html>`;
+
+  return new Response(html, {
+    headers,
+  });
+});
+
 api.route('/auth', auth);
 api.route('/nodes', nodes);
 api.route('/threads', threads);
