@@ -16,6 +16,7 @@ import images from './routes/images';
 import config from './routes/config';
 import admin from './routes/admin'; // 1. 引入新路由
 import adminNodes from './routes/adminNodes'; // 1. 引入新路由
+import adminUserGroups from './routes/adminUserGroups'; // 1. 引入新路由
 import { tryAuthMiddleware } from './auth/tryAuthMiddleware';
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -77,6 +78,7 @@ api.route('/images', images);
 api.route('/config', config);
 api.route('/admin', admin); // 2. 挂载管理员路由
 api.route('/admin/nodes', adminNodes); // 2. 挂载版块管理路由
+api.route('/admin/groups', adminUserGroups); // 2. 挂载用户组管理路由
 
 app.get('/r2/:key{.+$}', async (c) => {
   const key = c.req.param('key');

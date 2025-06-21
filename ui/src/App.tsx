@@ -19,6 +19,8 @@ import RankingsPage from './pages/RankingsPage';
 import AdminLoginPage from './pages/admin/LoginPage';
 import AdminDashboardPage from './pages/admin/DashboardPage';
 import AdminUsersPage from './pages/admin/UsersPage';
+import AdminUsersGroupPage from './pages/admin/UserGroupsPage';
+import EditAdminUserGroupPage from './pages/admin/EditUserGroupPage'; // 1. 引入新页面
 import AdminContentPage from './pages/admin/ContentPage';
 import AdminRepliesPage from './pages/admin/RepliesPage';
 import AdminNodesPage from './pages/admin/NodesPage'; // 1. 引入新页面
@@ -69,6 +71,8 @@ function App() {
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin/dashboard" element={<AdminPrivateRoute><AdminDashboardPage /></AdminPrivateRoute>} />
         <Route path="/admin/users" element={<AdminPrivateRoute><AdminUsersPage /></AdminPrivateRoute>} />
+        <Route path="/admin/users/groups" element={<AdminPrivateRoute><AdminUsersGroupPage /></AdminPrivateRoute>} />
+        <Route path="/admin/users/groups/:levelId" element={<AdminPrivateRoute><EditAdminUserGroupPage /></AdminPrivateRoute>} /> {/* 2. 添加权限编辑路由 */}
         <Route path="/admin/content/threads" element={<AdminPrivateRoute><AdminContentPage /></AdminPrivateRoute>} />
         <Route path="/admin/content/replies" element={<AdminPrivateRoute><AdminRepliesPage /></AdminPrivateRoute>} /> {/* 2. 添加回帖管理路由 */}
         <Route path="/admin/setting/nodes" element={<AdminPrivateRoute><AdminNodesPage /></AdminPrivateRoute>} /> {/* 2. 添加版块管理路由 */}
