@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Link } from 'react-router-dom';
 import { Pin } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Node } from '@/types';
 
 interface AdminThread {
   id: number;
@@ -78,7 +79,7 @@ const ContentPage = () => {
     setSelectedIds(prev => checked ? [...prev, id] : prev.filter(i => i !== id));
   };
 
-  const handleBatchAction = async (action: 'pin' | 'unpin' | 'delete') => {
+  const handleBatchAction = async (action: 'pin' | 'unpin' | 'delete' | 'move', targetNodeId?: number) => {
     if (selectedIds.length === 0) {
       toast({ title: "提示", description: "请至少选择一个帖子。" });
       return;
@@ -86,9 +87,11 @@ const ContentPage = () => {
     try {
       let res;
       if (action === 'delete') {
-        res = await apiClient.delete('/admin/threads', { ids: selectedIds });
+        res = await apiClient.delete(`/admin/threads`, { ids: selectedIds }) as any;
+      } else if (action === 'move') {
+        res = await apiClient.put('/admin/threads/move', { ids: selectedIds, targetNodeId  }) as any;
       } else {
-        res = await apiClient.put('/admin/threads/pin', { ids: selectedIds, isPinned: action === 'pin' });
+        res = await apiClient.put('/admin/threads/pin', { ids: selectedIds, isPinned: action === 'pin' }) as any;
       }
       toast({ title: "成功", description: res.message });
       setSelectedIds([]);
@@ -103,7 +106,7 @@ const ContentPage = () => {
 
   return (
     <AdminLayout>
-      {isMoveModalOpen && <MoveThreadsModal nodes={nodes} onCancel={() => setIsMoveModalOpen(false)} onConfirm={(target) => { handleBatchAction('move', target); setIsMoveModalOpen(false); }} />}
+      {isMoveModalOpen && <MoveThreadsModal nodes={nodes} onCancel={() => setIsMoveModalOpen(false)} onConfirm={(target: string) => { handleBatchAction('move', parseInt(target)); setIsMoveModalOpen(false); }} />}
       <div className="bg-white p-6 border rounded-sm shadow-sm">
         <div className="flex border-b border-gray-300 mb-6">
           <div className="px-0 mr-5 pt-0 py-2 text-lg font-bold text-[#336699] border-b-2 border-[#336699] -mb-px">帖子管理</div>
