@@ -89,7 +89,7 @@ const ContentPage = () => {
       if (action === 'delete') {
         res = await apiClient.delete(`/admin/threads`, { ids: selectedIds }) as any;
       } else if (action === 'move') {
-        res = await apiClient.put('/admin/threads/move', { ids: selectedIds, targetNodeId  }) as any;
+        res = await apiClient.put('/admin/threads/move', { ids: selectedIds, targetNodeId }) as any;
       } else {
         res = await apiClient.put('/admin/threads/pin', { ids: selectedIds, isPinned: action === 'pin' }) as any;
       }
@@ -107,63 +107,61 @@ const ContentPage = () => {
   return (
     <AdminLayout>
       {isMoveModalOpen && <MoveThreadsModal nodes={nodes} onCancel={() => setIsMoveModalOpen(false)} onConfirm={(target: string) => { handleBatchAction('move', parseInt(target)); setIsMoveModalOpen(false); }} />}
-      <div className="bg-white p-6 border rounded-sm shadow-sm">
-        <div className="flex border-b border-gray-300 mb-6">
-          <div className="px-0 mr-5 pt-0 py-2 text-lg font-bold text-[#336699] border-b-2 border-[#336699] -mb-px">帖子管理</div>
-          <Link to="/admin/content/replies" className="px-0 mr-5 pt-0 py-2 text-lg text-gray-600 hover:text-[#336699]">回帖管理</Link>
-        </div>
-        <div className="bg-gray-50 p-4 mb-6 text-sm text-gray-600 border rounded-sm">
-          <p>1. 搜索支持通配符 *，多个用户名之间用英文半角逗号“,”分隔。</p>
-        </div>
-        <div className="flex space-x-4 mb-4 items-center">
-          <Input placeholder="关键词" value={search.keyword} onChange={e => setSearch({ ...search, keyword: e.target.value })} />
-          <Input placeholder="作者" value={search.author} onChange={e => setSearch({ ...search, author: e.target.value })} />
-          <Button onClick={fetchThreads}>搜索</Button>
-        </div>
-        <div className="mb-4">
-          <Button variant="outline" size="sm" onClick={() => handleBatchAction('pin')}>置顶</Button>
-          <Button variant="outline" size="sm" onClick={() => setIsMoveModalOpen(true)}>移动</Button>
-          <Button variant="outline" size="sm" className="ml-2" onClick={() => handleBatchAction('unpin')}>取消置顶</Button>
-          <Button variant="destructive" size="sm" className="ml-2" onClick={() => handleBatchAction('delete')} disabled={selectedIds.length === 0}>删除选中</Button>
-        </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-gray-100 text-left">
-              <th className="p-2 w-10">
-                <Checkbox
-                  onCheckedChange={handleSelectAll}
-                  checked={isAllSelected ? true : (isPartialSelected ? 'indeterminate' : false)}
-                />
-              </th>
-              <th className="p-2">标题</th>
-              <th className="p-2 w-32">作者</th>
-              <th className="p-2 w-32">所属版块</th>
-              <th className="p-2 w-40">发表时间</th>
-              <th className="p-2 w-24">回复/查看</th>
-            </tr>
-          </thead>
-          <tbody>
-            {threads.map(thread => (
-              <tr key={thread.id} className="border-b">
-                <td className="p-2">
-                  <Checkbox
-                    checked={selectedIds.includes(thread.id)}
-                    onCheckedChange={(checked) => handleSelectOne(thread.id, !!checked)}
-                  />
-                </td>
-                <td className="p-2 flex items-center">
-                  {!!thread.is_pinned && <Pin className="w-4 h-4 text-orange-500 mr-2 shrink-0"/>}
-                  <Link to={`/threads/${thread.id}`} className="text-blue-600 hover:underline truncate">{thread.title}</Link>
-                </td>
-                <td className="p-2"><Link to={`/admin/users?uid=${thread.author_id}`} className="text-blue-600 hover:underline">{thread.author}</Link></td>
-                <td className="p-2"><Link to={`/nodes/${thread.node_id}`} className="text-blue-600 hover:underline">{thread.node_name}</Link></td>
-                <td className="p-2">{format(new Date(thread.created_at * 1000), 'yyyy-MM-dd HH:mm')}</td>
-                <td className="p-2">{thread.reply_count} / {thread.view_count}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="flex border-b border-gray-300 mb-[19px]">
+        <div className="px-0 mr-5 pt-0 py-2 text-[14px] font-bold text-[#336699] border-b-2 border-[#336699] -mb-px">帖子管理</div>
+        <Link to="/admin/content/replies" className="px-0 mr-5 pt-0 py-2 text-[14px] text-gray-600 hover:text-[#336699]">回帖管理</Link>
       </div>
+      <div className="bg-gray-50 p-4 mb-6 text-sm text-gray-600 border rounded-sm">
+        <p>1. 搜索支持通配符 *，多个用户名之间用英文半角逗号“,”分隔。</p>
+      </div>
+      <div className="flex space-x-4 mb-4 items-center">
+        <Input placeholder="关键词" value={search.keyword} onChange={e => setSearch({ ...search, keyword: e.target.value })} />
+        <Input placeholder="作者" value={search.author} onChange={e => setSearch({ ...search, author: e.target.value })} />
+        <Button onClick={fetchThreads}>搜索</Button>
+      </div>
+      <div className="mb-4">
+        <Button variant="outline" size="sm" onClick={() => handleBatchAction('pin')}>置顶</Button>
+        <Button variant="outline" size="sm" onClick={() => setIsMoveModalOpen(true)}>移动</Button>
+        <Button variant="outline" size="sm" className="ml-2" onClick={() => handleBatchAction('unpin')}>取消置顶</Button>
+        <Button variant="destructive" size="sm" className="ml-2" onClick={() => handleBatchAction('delete')} disabled={selectedIds.length === 0}>删除选中</Button>
+      </div>
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="bg-gray-100 text-left">
+            <th className="p-2 w-10">
+              <Checkbox
+                onCheckedChange={handleSelectAll}
+                checked={isAllSelected ? true : (isPartialSelected ? 'indeterminate' : false)}
+              />
+            </th>
+            <th className="p-2">标题</th>
+            <th className="p-2 w-32">作者</th>
+            <th className="p-2 w-32">所属版块</th>
+            <th className="p-2 w-40">发表时间</th>
+            <th className="p-2 w-24">回复/查看</th>
+          </tr>
+        </thead>
+        <tbody>
+          {threads.map(thread => (
+            <tr key={thread.id} className="border-b">
+              <td className="p-2">
+                <Checkbox
+                  checked={selectedIds.includes(thread.id)}
+                  onCheckedChange={(checked) => handleSelectOne(thread.id, !!checked)}
+                />
+              </td>
+              <td className="p-2 flex items-center">
+                {!!thread.is_pinned && <Pin className="w-4 h-4 text-orange-500 mr-2 shrink-0" />}
+                <Link to={`/threads/${thread.id}`} className="text-blue-600 hover:underline truncate">{thread.title}</Link>
+              </td>
+              <td className="p-2"><Link to={`/admin/users?uid=${thread.author_id}`} className="text-blue-600 hover:underline">{thread.author}</Link></td>
+              <td className="p-2"><Link to={`/nodes/${thread.node_id}`} className="text-blue-600 hover:underline">{thread.node_name}</Link></td>
+              <td className="p-2">{format(new Date(thread.created_at * 1000), 'yyyy-MM-dd HH:mm')}</td>
+              <td className="p-2">{thread.reply_count} / {thread.view_count}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </AdminLayout>
   );
 };

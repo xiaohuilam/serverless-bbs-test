@@ -82,38 +82,35 @@ const UsersPage = () => {
   return (
     <AdminLayout>
       {editingUser && <EditUserModal user={editingUser} onClose={() => setEditingUser(null)} onUserUpdated={fetchUsers} />}
-      <div className="bg-white p-6 border rounded-sm shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-3">用户管理</h2>
-        <div className="bg-gray-50 p-4 mb-6 text-sm text-gray-600 border rounded-sm">
-          <p>1. 用户名和电子邮箱支持模糊搜索。</p>
-          <p>2. 您可以对用户的基本信息、积分、用户组进行管理。</p>
-        </div>
-        <div className="flex space-x-4 mb-4 items-center">
-          <Input placeholder="UID" value={search.uid} onChange={e => setSearch({ ...search, uid: e.target.value })} />
-          <Input placeholder="用户名包含" value={search.username} onChange={e => setSearch({ ...search, username: e.target.value })} />
-          <Input placeholder="电子邮箱" value={search.email} onChange={e => setSearch({ ...search, email: e.target.value })} />
-          <Button onClick={handleSearch}>搜索</Button>
-        </div>
-        <table className="w-full text-sm">
-          <thead><tr className="bg-gray-100 text-left"><th className="p-2">UID</th><th className="p-2">用户名</th><th className="p-2">电子邮箱</th><th className="p-2">注册时间</th><th className="p-2">角色</th><th className="p-2">操作</th></tr></thead>
-          <tbody>
-            {users.map(user => (
-              <tr key={user.id} className="border-b">
-                <td className="p-2">{user.id.substring(0, 8)}...</td>
-                <td className="p-2">{user.username}</td>
-                <td className="p-2">{user.email}</td>
-                <td className="p-2">{format(new Date(user.created_at * 1000), 'yyyy-MM-dd HH:mm')}</td>
-                <td className="p-2">{user.role}</td>
-                <td className="p-2 space-x-2">
-                  <button onClick={() => openEditModal(user)} className="text-blue-600 hover:underline">编辑</button>
-                  <Link to={`/admin/content/threads?author=${user.id}`} className="text-blue-600 hover:underline truncate">管理帖子</Link>
-                  <Link to={`/admin/content/reply?author=${user.id}`} className="text-blue-600 hover:underline truncate">管理回复</Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <h2 className="text-[14px] font-semibold text-gray-700 mb-4 border-b pb-3">用户管理</h2>
+      <div className="bg-gray-50 p-4 mb-6 text-sm text-gray-600 border rounded-sm">
+        <p>1. 用户名和电子邮箱支持模糊搜索。</p>
       </div>
+      <div className="flex space-x-4 mb-4 items-center">
+        <Input placeholder="UID" value={search.uid} onChange={e => setSearch({ ...search, uid: e.target.value })} />
+        <Input placeholder="用户名包含" value={search.username} onChange={e => setSearch({ ...search, username: e.target.value })} />
+        <Input placeholder="电子邮箱" value={search.email} onChange={e => setSearch({ ...search, email: e.target.value })} />
+        <Button onClick={handleSearch}>搜索</Button>
+      </div>
+      <table className="w-full text-sm">
+        <thead><tr className="bg-gray-100 text-left"><th className="p-2">UID</th><th className="p-2">用户名</th><th className="p-2">电子邮箱</th><th className="p-2">注册时间</th><th className="p-2">角色</th><th className="p-2">操作</th></tr></thead>
+        <tbody>
+          {users.map(user => (
+            <tr key={user.id} className="border-b">
+              <td className="p-2">{user.id.substring(0, 8)}...</td>
+              <td className="p-2">{user.username}</td>
+              <td className="p-2">{user.email}</td>
+              <td className="p-2">{format(new Date(user.created_at * 1000), 'yyyy-MM-dd HH:mm')}</td>
+              <td className="p-2">{user.role}</td>
+              <td className="p-2 space-x-2">
+                <button onClick={() => openEditModal(user)} className="text-blue-600 hover:underline">编辑</button>
+                <Link to={`/admin/content/threads?author=${user.id}`} className="text-blue-600 hover:underline truncate">管理帖子</Link>
+                <Link to={`/admin/content/reply?author=${user.id}`} className="text-blue-600 hover:underline truncate">管理回复</Link>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </AdminLayout>
   );
 };

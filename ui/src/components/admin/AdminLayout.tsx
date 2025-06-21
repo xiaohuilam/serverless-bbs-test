@@ -52,7 +52,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 
 
   return (
-    <div className="flex h-screen bg-gray-100 font-sans">
+    <div className="flex h-screen bg-[#f3f3f3] font-sans">
       {/* 顶部导航栏 */}
       <header className="absolute top-0 left-0 right-0 h-[46px] bg-[#235179] text-white flex items-center justify-between px-6 z-20">
         <div className="flex items-center">
@@ -90,7 +90,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         </aside>
 
         {/* 主内容区 */}
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-4 overflow-y-auto">
           {children}
         </main>
       </div>
