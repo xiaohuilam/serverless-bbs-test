@@ -33,13 +33,14 @@ export default function AdminLoginPage() {
     return (
         <div className="bg-[#004B8D] min-h-screen flex items-center justify-center">
             <div className="w-full max-w-sm text-center">
-                <h1 className="text-white text-5xl mb-8 font-thin">phpwind</h1>
-                <div className="bg-white p-8 rounded-sm shadow-lg">
-                    <h2 className="text-xl text-gray-700 mb-6">管理员登录</h2>
+                <h1 className="text-white text-5xl mb-8 font-thin">ServerlessDiscuz!</h1>
+                <div className="bg-white p-10">
+                    <h2 className="text-lg text-gray-700 mb-6">管理员登录</h2>
                     <button
                         onClick={handleLogin}
                         disabled={isLoading}
-                        className="w-full bg-[#008DD1] hover:bg-[#007AB8] text-white font-bold py-3 px-4 rounded-sm transition duration-300 disabled:bg-gray-400"
+                        autoFocus
+                        className="w-full border border-[#008DD1] text-[#007AB8] focus:bg-[#007AB8] focus:text-white focus:outline-0 font-bold py-3 px-4 rounded-lg transition duration-300 disabled:bg-gray-400"
                     >
                         {isLoading ? '验证中...' : '使用 Passkey 登录'}
                     </button>

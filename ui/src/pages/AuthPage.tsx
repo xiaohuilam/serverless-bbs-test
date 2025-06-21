@@ -15,6 +15,7 @@ export default function AuthPage() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isSigning, setIsSigning] = useState(false);
 
   // 注册 Passkey
   const handleRegister = async () => {
@@ -50,6 +51,7 @@ export default function AuthPage() {
   // 登录 Passkey
   const handleLogin = async () => {
     try {
+      setIsSigning(true);
       // 1. 从后端获取认证选项
       const authOptions = await apiClient.post('/auth/login/challenge', {}) as any;
 
@@ -63,14 +65,17 @@ export default function AuthPage() {
       );
 
       if (verificationResponse.verified && verificationResponse.token) {
+        setIsSigning(false);
         toast({ title: "登录成功", description: "欢迎回来！" });
         login(verificationResponse.token);
         navigate('/');
       } else {
+        setIsSigning(false);
         throw new Error('Login verification failed.');
       }
 
     } catch (error) {
+      setIsSigning(false);
       toast({ title: "登录失败", description: `${error}`, variant: "destructive" });
       console.error(error);
     }
@@ -81,7 +86,9 @@ export default function AuthPage() {
       <tbody>
         <tr>
           <td className='border-r border-r-[#ccc] pr-4 text-center'>
-            <Button onClick={handleLogin} variant="default" className='rounded-[3px] px-2 h-[24px] text-xs'>Passkey 登录</Button>
+            <Button onClick={handleLogin} variant="default" className='rounded-[3px] px-2 h-[24px] text-xs'>
+              {isSigning ? '登录中...' : 'Passkey 登录'}
+            </Button>
           </td>
           <td><Label className='font-normal text-xs pl-4' htmlFor="username">用户名</Label></td>
           <td><Input className='h-[23px] w-[140px] text-[13px] px-[5px] focus:border-[#000] border-t-[#848484] border-r-[#E0E0E0] border-b-[#E0E0E0] border-l-[#848484]' style={{ boxShadow: 'inset 0 1px 1px #848484' }} id="username" value={username} onChange={e => setUsername(e.target.value)} placeholder="输入您的用户名" /></td>
