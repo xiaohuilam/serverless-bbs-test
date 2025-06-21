@@ -2,7 +2,7 @@ import { createMiddleware } from 'hono/factory';
 import type { Bindings, User } from '../types';
 
 // 定义中间件将添加到上下文中的变量类型
-type AuthVariables = {
+export type AuthVariables = {
   user: User;
 };
 
@@ -29,7 +29,7 @@ export const authMiddleware = createMiddleware<{ Bindings: Bindings, Variables: 
   }
 
   // 从 D1 中获取用户详细信息
-  const user = await c.env.DB.prepare('SELECT id, username, email, created_at, profile_bio, avatar FROM Users WHERE id = ?')
+  const user = await c.env.DB.prepare('SELECT id, username, email, created_at, profile_bio, avatar, role FROM Users WHERE id = ?')
    .bind(userId)
    .first<User>();
 

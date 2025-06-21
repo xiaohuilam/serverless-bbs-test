@@ -67,6 +67,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       <span>|</span>
                       <Link to="/settings" className="text-[#333]">我的设置</Link>
                       <span>|</span>
+                      {
+                        user.role == 'admin'
+                        &&
+                        <>
+                          <Link to="/admin/dashboard" target='_blank' className="text-[#333]">管理后台</Link>
+                          <span>|</span>
+                        </>
+                      }
                       <Link to="/notifications" className="text-[#333]">消息</Link>
                       <span>|</span>
                       <a href="#" onClick={handleLogout} className="text-[#333]">退出</a>

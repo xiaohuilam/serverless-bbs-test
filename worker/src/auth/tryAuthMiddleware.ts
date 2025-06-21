@@ -20,9 +20,10 @@ export const tryAuthMiddleware = createMiddleware<{ Bindings: Bindings, Variable
     return next();
   }
 
-  const user = await c.env.DB.prepare(
-    'SELECT id, username, email, level, avatar FROM Users WHERE id = ?'
-  ).bind(userId).first<User>();
+  // 从 D1 中获取用户详细信息
+  const user = await c.env.DB.prepare('SELECT id, username, email, created_at, profile_bio, avatar, role FROM Users WHERE id = ?')
+   .bind(userId)
+   .first<User>();
 
   if (user) {
     // 如果用户有效，则将其信息设置到上下文中

@@ -51,8 +51,8 @@ const RepliesPage = () => {
         <Link to="/admin/content/threads" className="px-0 mr-5 pt-0 py-2 text-[14px] text-gray-600 hover:text-[#336699]">帖子管理</Link>
         <div className="px-0 mr-5 pt-0 py-2 text-[14px] font-bold text-[#336699] border-b-2 border-[#336699] -mb-px">回帖管理</div>
       </div>
-      <div className="bg-gray-50 p-4 mb-6 text-sm text-gray-600 border rounded-sm">
-        <p>1. 搜索支持通配符 *，多个用户名之间用英文半角逗号“,”分隔。</p>
+      <div className="bg-gray-50 p-2 mb-6 text-sm text-gray-600 border rounded-sm">
+        <p>提示：搜索支持通配符 *，多个用户名之间用英文半角逗号“,”分隔。</p>
       </div>
       <div className="flex space-x-4 mb-4 items-center">
         <Input placeholder="内容包含" value={search.keyword} onChange={e => setSearch({ ...search, keyword: e.target.value })} />

@@ -7,6 +7,7 @@ interface User {
   username: string;
   email: string;
   avatar?: string; // 可选的头像 R2 key
+  role: 'admin' | 'user' | string;
 }
 
 interface AuthContextType {

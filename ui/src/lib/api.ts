@@ -10,10 +10,10 @@ class ApiClient {
       headers.set('Authorization', `Bearer ${token}`);
     }
     if (!(options.body instanceof FormData)) {
-        headers.set('Content-Type', 'application/json');
+      headers.set('Content-Type', 'application/json');
     }
 
-  console.log(`${API_BASE_URL}${endpoint}`);
+    // console.log(`${API_BASE_URL}${endpoint}`);
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers,
@@ -24,13 +24,13 @@ class ApiClient {
       console.error('API Error:', errorData);
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
-    
+
     // 如果响应体为空，返回 null
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.indexOf("application/json") !== -1) {
-        return response.json() as Promise<T>;
+      return response.json() as Promise<T>;
     } else {
-        return null as unknown as T;
+      return null as unknown as T;
     }
   }
 
@@ -61,18 +61,18 @@ class ApiClient {
 
   // 新增: 处理 FormData 上传的方法
   postFormData<T>(endpoint: string, formData: FormData): Promise<T> {
-      // 对于 FormData，我们不设置 Content-Type，浏览器会自动处理
-      const headers = new Headers();
-      const token = localStorage.getItem('token');
-      if (token) {
-          headers.set('Authorization', `Bearer ${token}`);
-      }
+    // 对于 FormData，我们不设置 Content-Type，浏览器会自动处理
+    const headers = new Headers();
+    const token = localStorage.getItem('token');
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
 
-      return this.request<T>(endpoint, {
-          method: 'POST',
-          body: formData,
-          headers,
-      });
+    return this.request<T>(endpoint, {
+      method: 'POST',
+      body: formData,
+      headers,
+    });
   }
 }
 

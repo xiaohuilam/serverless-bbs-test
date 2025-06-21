@@ -8,36 +8,36 @@ import type { Bindings, Passkey, User } from '../types';
 import { getPasskeyById } from '../lib/passkeys';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
+import { createMiddleware } from 'hono/factory';
+import { AuthVariables } from '../auth/middleware';
 
 // Admin Auth Middleware
-const adminAuthMiddleware = async (c: any, next: any) => {
+export const adminAuthMiddleware = createMiddleware<{ Bindings: Bindings, Variables: AuthVariables }>(async (c, next) => {
   // 在真实应用中，这里应验证 JWT 或 session token
   const authHeader = c.req.header('Authorization');
   if (!authHeader) {
-    return c.json({ error: 'Unauthorized' }, 401);
+    return c.json({ error: 'Unauthorized: no Authorization header' }, 401);
   }
   const token = authHeader.split(' ')[1];
   if (!token) {
-    return c.json({ error: 'Unauthorized' }, 401);
+    return c.json({ error: 'Unauthorized: no token' }, 401);
   }
   const userId = await c.env.KV_SESSIONS.get(`session:${token}`);
   if (!userId) {
     console.log(token);
-    return c.json({ error: 'Unauthorized' }, 401);
+    return c.json({ error: 'Unauthorized: no id' }, 401);
   }
   const user = <User> await c.env.DB.prepare('SELECT * FROM Users WHERE id = ?').bind(userId).first();
   if (!user) {
-    console.log(user);
-    return c.json({ error: 'Unauthorized' }, 401);
+    return c.json({ error: 'Unauthorized: no user[SELECT * FROM Users WHERE id = "' +userId + '"]' }, 401);
   }
-
   if (user.role != 'admin') {
-    return c.json({ error: 'Access denied' }, 403);
+    return c.json({ error: 'Access denied: no role' }, 403);
   }
 
   c.set('user', user);
   await next();
-};
+});
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -105,7 +105,7 @@ app.post('/login/verify', async (c) => {
   if (!verified) return c.json({ verified: false }, 400);
 
   // Check if the authenticated user is an admin
-  const user = await c.env.DB.prepare("SELECT role FROM Users WHERE id = ?").bind(passkey.user_id).first<User>();
+  const user = await c.env.DB.prepare("SELECT * FROM Users WHERE id = ?").bind(passkey.user_id).first<User>();
   if (user?.role !== 'admin') {
     return c.json({ error: 'Access denied. Not an administrator.' }, 403);
   }
@@ -230,7 +230,6 @@ app.put('/threads/move', zValidator('json', moveSchema), async (c) => {
 
 // Delete threads
 app.delete('/threads', zValidator('json', z.object({ ids: z.array(z.number()) })), async (c) => { /* ... */ });
-
 
 
 // 新增：Get replies with search

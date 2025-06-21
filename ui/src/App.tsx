@@ -21,6 +21,7 @@ import AdminDashboardPage from './pages/admin/DashboardPage';
 import AdminUsersPage from './pages/admin/UsersPage';
 import AdminContentPage from './pages/admin/ContentPage';
 import AdminRepliesPage from './pages/admin/RepliesPage';
+import AdminNodesPage from './pages/admin/NodesPage'; // 1. 引入新页面
 
 import { useAuth } from './hooks/useAuth';
 
@@ -33,7 +34,7 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
 
 // Private Route for admin area
 const AdminPrivateRoute = ({ children }: { children: JSX.Element }) => {
-  const token = localStorage.getItem('admin_token');
+  const token = localStorage.getItem('token');
   return token ? children : <Navigate to="/admin/login" />;
 };
 
@@ -70,6 +71,7 @@ function App() {
         <Route path="/admin/users" element={<AdminPrivateRoute><AdminUsersPage /></AdminPrivateRoute>} />
         <Route path="/admin/content/threads" element={<AdminPrivateRoute><AdminContentPage /></AdminPrivateRoute>} />
         <Route path="/admin/content/replies" element={<AdminPrivateRoute><AdminRepliesPage /></AdminPrivateRoute>} /> {/* 2. 添加回帖管理路由 */}
+        <Route path="/admin/setting/nodes" element={<AdminPrivateRoute><AdminNodesPage /></AdminPrivateRoute>} /> {/* 2. 添加版块管理路由 */}
         <Route path="/admin/*" element={<Navigate to="/admin/login" replace />} />
 
         {/* All user-facing routes are handled by MainApp */}

@@ -83,8 +83,8 @@ const UsersPage = () => {
     <AdminLayout>
       {editingUser && <EditUserModal user={editingUser} onClose={() => setEditingUser(null)} onUserUpdated={fetchUsers} />}
       <h2 className="text-[14px] font-semibold text-gray-700 mb-4 border-b pb-3">用户管理</h2>
-      <div className="bg-gray-50 p-4 mb-6 text-sm text-gray-600 border rounded-sm">
-        <p>1. 用户名和电子邮箱支持模糊搜索。</p>
+      <div className="bg-gray-50 p-2 mb-6 text-sm text-gray-600 border rounded-sm">
+        <p>提示：用户名和电子邮箱支持模糊搜索。</p>
       </div>
       <div className="flex space-x-4 mb-4 items-center">
         <Input placeholder="UID" value={search.uid} onChange={e => setSearch({ ...search, uid: e.target.value })} />

@@ -15,6 +15,7 @@ import rankings from './routes/rankings';
 import images from './routes/images';
 import config from './routes/config';
 import admin from './routes/admin'; // 1. 引入新路由
+import adminNodes from './routes/adminNodes'; // 1. 引入新路由
 import { tryAuthMiddleware } from './auth/tryAuthMiddleware';
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -24,6 +25,7 @@ app.use('/api/*', cors({
   origin: ['http://localhost:5173', 'http://127.0.0.1:8788', 'https://serverless-bbs.pages.dev', 'https://*.serverless-bbs.pages.dev', 'https://serverless-bbs.anquanssl.com'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
+  maxAge: 31560000,
 }));
 
 const api = new Hono();
@@ -74,6 +76,7 @@ api.route('/rankings', rankings);
 api.route('/images', images);
 api.route('/config', config);
 api.route('/admin', admin); // 2. 挂载管理员路由
+api.route('/admin/nodes', adminNodes); // 2. 挂载版块管理路由
 
 app.get('/r2/:key{.+$}', async (c) => {
   const key = c.req.param('key');

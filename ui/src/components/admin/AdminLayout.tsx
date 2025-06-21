@@ -6,24 +6,26 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('admin_token');
+    localStorage.removeItem('token');
     navigate('/admin/login');
   };
 
   const mainNavItems = [
     { href: '/admin/dashboard', label: '首页' },
     // { href: '/admin/settings', label: '全局' },
+    { href: '/admin/setting/nodes', label: '论坛设置' },
     { href: '/admin/users', label: '用户' },
     { href: '/admin/content/threads', label: '内容' },
   ];
 
   // 根据当前路径判断侧边栏显示内容
   const renderSidebarNav = () => {
-    if (location.pathname.startsWith('/admin/settings')) {
+    if (location.pathname.startsWith('/admin/setting')) {
       return (
         <ul>
-          <li><Link to="/admin/settings" className="block py-1 px-4 text-xs text-gray-700 hover:bg-gray-200">站点信息</Link></li>
-          <li><Link to="/admin/settings/registration" className="block py-1 px-4 text-xs text-gray-700 hover:bg-gray-200">注册设置</Link></li>
+          <li><Link to="/admin/setting" className="block py-1 px-4 text-xs text-gray-700 hover:bg-gray-200">站点信息</Link></li>
+          <li><Link to="/admin/setting/nodes" className={`block py-1 px-4 text-xs hover:bg-gray-200 ${location.pathname === '/admin/setting/nodes' ? 'bg-gray-200' : ''}`}>版块管理</Link></li>
+          <li><Link to="/admin/setting/registration" className="block py-1 px-4 text-xs text-gray-700 hover:bg-gray-200">注册设置</Link></li>
         </ul>
       );
     }
@@ -45,7 +47,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     }
     return (
       <ul>
-        <li><Link to="/admin/dashboard" className="block py-1 px-4 text-xs text-gray-700 bg-gray-200">系统信息</Link></li>
+        <li><Link to="/admin/dashboard" className="block py-1 px-4 text-xs text-gray-700 hover:bg-gray-200">系统信息</Link></li>
       </ul>
     );
   }
