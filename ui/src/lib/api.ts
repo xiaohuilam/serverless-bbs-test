@@ -52,8 +52,11 @@ class ApiClient {
     });
   }
 
-  delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+  delete<T>(endpoint: string, body?: unknown): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'DELETE',
+      body: body ? JSON.stringify(body) : null,
+    });
   }
 
   // 新增: 处理 FormData 上传的方法
