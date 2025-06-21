@@ -18,6 +18,9 @@ import RankingsPage from './pages/RankingsPage';
 // Admin Page Imports
 import AdminLoginPage from './pages/admin/LoginPage';
 import AdminDashboardPage from './pages/admin/DashboardPage';
+import AdminUsersPage from './pages/admin/UsersPage';
+import AdminContentPage from './pages/admin/ContentPage';
+import AdminRepliesPage from './pages/admin/RepliesPage';
 
 import { useAuth } from './hooks/useAuth';
 
@@ -64,7 +67,9 @@ function App() {
         {/* Admin routes (no main layout) */}
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin/dashboard" element={<AdminPrivateRoute><AdminDashboardPage /></AdminPrivateRoute>} />
-        {/* Add more /admin/* routes here, inside the AdminPrivateRoute if needed */}
+        <Route path="/admin/users" element={<AdminPrivateRoute><AdminUsersPage /></AdminPrivateRoute>} />
+        <Route path="/admin/content/threads" element={<AdminPrivateRoute><AdminContentPage /></AdminPrivateRoute>} />
+        <Route path="/admin/content/replies" element={<AdminPrivateRoute><AdminRepliesPage /></AdminPrivateRoute>} /> {/* 2. 添加回帖管理路由 */}
         <Route path="/admin/*" element={<Navigate to="/admin/login" replace />} />
 
         {/* All user-facing routes are handled by MainApp */}

@@ -15,7 +15,7 @@ export type Bindings = {
 };
 
 // User-related types
-export type User = { id: string; username: string; email: string; created_at: number; profile_bio?: string; avatar?: string; level: number;};
+export type User = { id: string; username: string; email: string; created_at: number; profile_bio?: string; avatar?: string; level: number; role: string;};
 export type Passkey = { id: string; user_id: string; pubkey_blob: ArrayBuffer; sign_counter: number; created_at: number; };
 
 // Forum structure types
