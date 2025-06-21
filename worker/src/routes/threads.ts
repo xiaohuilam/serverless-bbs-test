@@ -45,10 +45,11 @@ const createThreadSchema = z.object({
   type: z.enum(['discussion', 'poll']),
   readPermission: z.number().int().min(0),
   pollOptions: z.array(z.string().min(1)).optional(),
+  isAuthorOnly: z.boolean().optional(),
 });
 
 app.post('/', authMiddleware, zValidator('json', createThreadSchema), async (c) => {
-    const { nodeId, title, body, type, readPermission, pollOptions } = c.req.valid('json');
+    const { nodeId, title, body, type, readPermission, isAuthorOnly, pollOptions } = c.req.valid('json');
     if (type === 'poll' && (!pollOptions || pollOptions.length < 2)) {
         return c.json({ error: '投票至少需要2个选项。' }, 400);
     }
@@ -58,9 +59,9 @@ app.post('/', authMiddleware, zValidator('json', createThreadSchema), async (c) 
     
     // 使用事务创建帖子和投票选项
     const results = await db.batch([
-        db.prepare(`INSERT INTO Threads (node_id, author_id, title, body, type, read_permission, created_at, last_reply_at) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-        ).bind(nodeId, user.id, title, body, type, readPermission, now, now)
+        db.prepare(`INSERT INTO Threads (node_id, author_id, title, body, type, read_permission, is_author_only, created_at, last_reply_at) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ).bind(nodeId, user.id, title, body, type, readPermission, isAuthorOnly, now, now)
     ]);
     const newThreadId = results[0].meta.last_row_id;
 

@@ -3,12 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from "@/components/ui/use-toast"
 import { Plus, Trash2 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { EyeOff } from 'lucide-react';
 
 export default function NewThreadPage() {
   const { nodeId } = useParams<{ nodeId: string }>();
@@ -17,22 +17,23 @@ export default function NewThreadPage() {
   const [body, setBody] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const [isAuthorOnly, setIsAuthorOnly] = useState(false);
 
   const [type, setType] = useState<'discussion' | 'poll'>('discussion');
   const [readPermission, setReadPermission] = useState(0);
   const [pollOptions, setPollOptions] = useState<string[]>(['', '']);
 
   const handlePollOptionChange = (index: number, value: string) => {
-      const newOptions = [...pollOptions];
-      newOptions[index] = value;
-      setPollOptions(newOptions);
+    const newOptions = [...pollOptions];
+    newOptions[index] = value;
+    setPollOptions(newOptions);
   };
 
   const addPollOption = () => setPollOptions([...pollOptions, '']);
   const removePollOption = (index: number) => {
-      if (pollOptions.length > 2) {
-          setPollOptions(pollOptions.filter((_, i) => i !== index));
-      }
+    if (pollOptions.length > 2) {
+      setPollOptions(pollOptions.filter((_, i) => i !== index));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,12 +43,13 @@ export default function NewThreadPage() {
     setIsSubmitting(true);
     try {
       const payload = {
-          nodeId: parseInt(nodeId!, 10),
-          title,
-          body,
-          type,
-          readPermission,
-          pollOptions: type === 'poll' ? pollOptions.filter(opt => opt.trim() !== '') : undefined,
+        nodeId: parseInt(nodeId!, 10),
+        title,
+        body,
+        type,
+        readPermission,
+        isAuthorOnly,
+        pollOptions: type === 'poll' ? pollOptions.filter(opt => opt.trim() !== '') : undefined,
       };
       const response = await apiClient.post<{ threadId: number }>('/threads', payload);
       toast({ title: "成功", description: "您的帖子已成功发布！" });
@@ -95,6 +97,15 @@ export default function NewThreadPage() {
             <p className="text-xs text-gray-500 mt-1">设置阅读此主题所需的最低用户等级，0为不限制</p>
           </div>
 
+          <div className="mt-6 border-t pt-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox id="isAuthorOnly" checked={isAuthorOnly} onCheckedChange={(checked) => setIsAuthorOnly(Boolean(checked))} />
+              <label htmlFor="isAuthorOnly" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center">
+                <EyeOff className="w-4 h-4 mr-2 text-gray-500" />
+                回帖仅作者可见
+              </label>
+            </div>
+          </div>
           <div className="mt-6 text-center">
             <Button type="submit" className="bg-[#336699] hover:bg-[#2366A8] rounded-sm text-lg px-8 h-10 font-bold">发表帖子</Button>
           </div>

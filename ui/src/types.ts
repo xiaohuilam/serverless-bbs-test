@@ -37,6 +37,7 @@ export type Thread = {
     body: string;
     type: 'discussion' | 'poll' | 'raffle'; // 新增：帖子类型
     read_permission: number; // 新增：阅读权限
+    is_author_only: boolean;
 };
 export type ThreadWithAuthor = Thread & { author_username: string; author_avatar?: string };
 
@@ -46,6 +47,7 @@ export type Reply = {
     author_id: string; 
     created_at: number; 
     body: string; // 不再是 body
+    is_author_only: boolean;
     reply_to_id: number | null; 
 };
 export type ReplyWithAuthor = Reply & {

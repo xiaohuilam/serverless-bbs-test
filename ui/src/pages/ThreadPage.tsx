@@ -8,7 +8,8 @@ import { format } from 'date-fns';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import type { ThreadWithDetails, PollOption, UserVote, Reply } from '../types'; // 从共享类型导入
 import defaultAvatar from '@/img/default_avatar.svg';
-import { Mail } from 'lucide-react';
+import { Mail, EyeOff, Lock } from 'lucide-react';
+
 
 // --- 子组件 ---
 
@@ -78,7 +79,15 @@ const PollComponent = ({ threadId, options, userVote, onVoted }: { threadId: num
     );
 };
 
-const Post = ({ post, isOp, floor, onQuote, onVoted }: { post: (any | ThreadWithDetails | Reply) & { author_username: string, author_avatar?: string, body: string, created_at: number }, isOp?: boolean, floor: number, onQuote: () => void, onVoted?: () => void }) => {
+// 私密回复的占位符组件
+const PrivateReplyPlaceholder = () => (
+    <div className="border border-dashed border-red-300 bg-red-50 p-2 text-center text-sm text-red-700">
+        <Lock className='w-[16px] h-[16px] inline mr-1'/>
+        此帖仅作者可见
+    </div>
+);
+
+const Post = ({ post, isOp, floor, onQuote, onVoted, canViewPrivate }: { post: (any | ThreadWithDetails | Reply) & { author_username: string, author_avatar?: string, body: string, created_at: number, is_author_only?: boolean }, isOp?: boolean, floor: number, onQuote: () => void, onVoted?: () => void, canViewPrivate: boolean }) => {
     const navigate = useNavigate();
     const handleSendMessage = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -87,6 +96,8 @@ const Post = ({ post, isOp, floor, onQuote, onVoted }: { post: (any | ThreadWith
 
     const avatarUrl = post.author_avatar ? post.author_avatar : defaultAvatar;
     const hasQuote = 'quoted_author' in post && post.quoted_author;
+    // 判断是否为私密回复且当前用户无权查看
+    const isPrivateAndHidden = !canViewPrivate;
 
     return (
         <div className="bg-white border-x border-[#CDCDCD] border-b-4 border-b-[#C2D5E3] flex">
@@ -113,7 +124,12 @@ const Post = ({ post, isOp, floor, onQuote, onVoted }: { post: (any | ThreadWith
                     <div>{isOp && <span className="mr-2">楼主</span>}<span className="font-bold text-lg">#{floor}</span></div>
                 </div>
 
-                <div className="prose prose-sm max-w-none text-base leading-relaxed text-[14px]" dangerouslySetInnerHTML={{ __html: post.body }} />
+                {
+                    isPrivateAndHidden ?
+                    <PrivateReplyPlaceholder />
+                    :
+                    <div className="prose prose-sm max-w-none text-base leading-relaxed text-[14px]" dangerouslySetInnerHTML={{ __html: post.body }} />
+                }
 
                 {isOp && post.type === 'poll' && post.poll_options && onVoted && (
                     <PollComponent
@@ -130,7 +146,7 @@ const Post = ({ post, isOp, floor, onQuote, onVoted }: { post: (any | ThreadWith
                         <div className="mt-2" dangerouslySetInnerHTML={{ __html: post.quoted_body || '' }} />
                     </blockquote>
                 )}
-                {!isOp &&
+                {(!isOp && !isPrivateAndHidden) &&
                     <div className="text-right mt-4"><Button onClick={onQuote} size="sm" variant="ghost" className="text-xs text-gray-500 hover:text-gray-900">回复</Button></div>
                 }
             </div>
@@ -182,6 +198,7 @@ export default function ThreadPage() {
     const [quotingReply, setQuotingReply] = useState<Reply | null>(null);
     const replyFormRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
+    const { user } = useAuth();
 
     const fetchThread = useCallback(async () => {
         if (!threadId) return;
@@ -232,15 +249,20 @@ export default function ThreadPage() {
                 floor={1}
                 onQuote={() => { }} // 主楼的 onQuote 是一个空操作，因为按钮已被移除
                 onVoted={fetchThread}
+                canViewPrivate={true}
             />
-            {thread.replies.map((reply: Reply, index: number) => (
-                <Post
-                    key={reply.id}
-                    post={reply}
-                    floor={index + 2}
-                    onQuote={() => handleSetQuoting(reply)}
-                />
-            ))}
+            {thread.replies.map((reply: Reply, index: number) => {
+                const canView = !!(user && (user.id === reply.author_id || user.id === thread.author_id)) as boolean;
+                return (
+                    <Post
+                        key={reply.id}
+                        post={reply}
+                        floor={index + 2}
+                        onQuote={() => handleSetQuoting(reply)}
+                        canViewPrivate={canView}
+                    />
+                );
+            })}
             <div ref={replyFormRef} className="border border-[#CDCDCD] border-t-0 flex mt-4">
                 <QuickReplyForm
                     threadId={threadId!}
