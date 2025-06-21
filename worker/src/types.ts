@@ -34,6 +34,7 @@ export type Thread = {
     reply_count: number; 
     is_pinned: boolean; 
     is_locked: boolean; 
+    is_author_only: boolean;
     body: string;
     type: 'discussion' | 'poll' | 'raffle'; // 新增：帖子类型
     read_permission: number; // 新增：阅读权限

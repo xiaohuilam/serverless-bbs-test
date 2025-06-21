@@ -83,7 +83,7 @@ app.get('/:id', async (c) => {
     const user = c.get('user');
 
     try {        
-        const thread = await db.prepare(`SELECT t.*, u.username as author_username, u.avatar as author_avatar, u.level as author_level FROM Threads t JOIN Users u ON t.author_id = u.id WHERE t.id = ?`).bind(threadId).first<any>();
+        const thread = await db.prepare(`SELECT t.*, u.username as author_username, u.avatar as author_avatar, u.level as author_level FROM Threads t JOIN Users u ON t.author_id = u.id WHERE t.id = ?`).bind(threadId).first<ThreadWithAuthor>();
         if (!thread) return c.json({ error: '帖子未找到' }, 404);
         
         // 权限检查
@@ -113,10 +113,20 @@ app.get('/:id', async (c) => {
             LEFT JOIN Users qu ON qr.author_id = qu.id
             WHERE r.thread_id = ? ORDER BY r.created_at ASC
         `;
-        const { results: replies } = await db.prepare(repliesQuery).bind(threadId).all<ReplyWithAuthor>();
+        let { results: replies } = await db.prepare(repliesQuery).bind(threadId).all<ReplyWithAuthor>();
 
         await db.prepare('UPDATE Threads SET view_count = view_count + 1 WHERE id = ?').bind(threadId).run();
 
+        if (thread.is_author_only) {
+            if (!user || user.id != thread.author_id) {
+                replies = replies.map(reply => {
+                    if (!user || reply.author_id != user.id) {
+                        reply.body = '';
+                    }
+                    return reply
+                });
+            }
+        }
         const response: ThreadWithDetails = { ...thread, replies, poll_options, user_vote };
         return c.json(response);
     } catch (e) {
