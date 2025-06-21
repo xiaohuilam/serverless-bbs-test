@@ -13,6 +13,15 @@ import { useAuth } from './hooks/useAuth';
 import SearchPage from './pages/SearchPage';
 import RankingsPage from './pages/RankingsPage';
 import { ConfigProvider } from './contexts/ConfigContext';
+// ... (其他页面 import)
+import AdminLoginPage from './pages/admin/LoginPage';
+import AdminDashboardPage from './pages/admin/DashboardPage';
+
+// Admin Private Route
+const AdminPrivateRoute = ({ children }: { children: JSX.Element }) => {
+    const token = localStorage.getItem('admin_token');
+    return token ? children : <Navigate to="/admin/login" />;
+};
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -23,6 +32,10 @@ function PrivateRoute({ children }: { children: JSX.Element }) {
 function App() {
   return (
     <Router>
+      <Routes>
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="/admin/dashboard" element={<AdminPrivateRoute><AdminDashboardPage /></AdminPrivateRoute>} />
+      </Routes>
       <ConfigProvider>
         <Layout>
           <Routes>

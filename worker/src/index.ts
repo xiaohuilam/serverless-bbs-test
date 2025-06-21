@@ -14,6 +14,7 @@ import search from './routes/search';
 import rankings from './routes/rankings';
 import images from './routes/images';
 import config from './routes/config';
+import admin from './routes/admin'; // 1. 引入新路由
 import { tryAuthMiddleware } from './auth/tryAuthMiddleware';
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -72,6 +73,7 @@ api.route('/search', search);
 api.route('/rankings', rankings);
 api.route('/images', images);
 api.route('/config', config);
+api.route('/admin', admin); // 2. 挂载管理员路由
 
 app.get('/r2/:key{.+$}', async (c) => {
   const key = c.req.param('key');
