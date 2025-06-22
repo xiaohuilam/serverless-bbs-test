@@ -88,7 +88,7 @@ const PrivateReplyPlaceholder = () => (
 );
 
 const Post = ({ type, post, isOp, floor, onQuote, onVoted, canViewPrivate }: { type: 'thread' | 'reply', post: (any | ThreadWithDetails | Reply) & { author_username: string, author_avatar?: string, body: string, created_at: number, is_author_only?: boolean }, isOp?: boolean, floor: number, onQuote: () => void, onVoted?: () => void, canViewPrivate: boolean }) => {
-  const {user} = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const handleSendMessage = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -197,8 +197,18 @@ const QuickReplyForm = ({ threadId, onReplyPosted, quotingReply, clearQuoting }:
   if (!isAuthenticated) return null;
   return (
     <>
-      <div className="w-40 shrink-0 border-r border-[#E5EDF2] p-4 text-center text-xs bg-[#F5FAFE]"><a href="#" className="font-bold text-base text-[#336699]">{user?.username}</a><div className="my-2"><img src={avatarUrl} className="mx-auto w-full object-cover" alt="avatar" /></div></div>
-      <div className="w-full bg-white p-4">{quotingReply && (<div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 text-xs mb-2">正在回复: <strong>{quotingReply.author_username}</strong> 的帖子 <button onClick={clearQuoting} className="float-right font-bold hover:text-black">取消</button></div>)}<RichTextEditor value={body} onChange={setBody} /><div className="mt-2"><Button onClick={handleSubmit} className="bg-[#0066CC] hover:bg-[#0055AA] text-white text-sm px-6 h-8 font-bold">发表回复</Button></div></div>
+      <div className="w-40 shrink-0 border-r border-[#E5EDF2] p-4 text-center text-xs bg-[#F5FAFE]">
+        <a href="#" className="font-bold text-base text-[#336699]">{user?.username}</a>
+        <div className="my-2">
+          <img src={avatarUrl} className="mx-auto w-full object-cover" alt="avatar" />
+        </div>
+      </div>
+      <div className="w-full bg-white p-4">{quotingReply && (<div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 text-xs mb-2">正在回复: <strong>{quotingReply.author_username}</strong> 的帖子 <button onClick={clearQuoting} className="float-right font-bold hover:text-black">取消</button></div>)}
+        <RichTextEditor value={body} onChange={setBody} />
+        <div className="mt-2">
+          <Button onClick={handleSubmit} className="bg-[#0066CC] hover:bg-[#0055AA] text-white text-sm px-6 h-8 font-bold">发表回复</Button>
+        </div>
+      </div>
     </>
   );
 };
