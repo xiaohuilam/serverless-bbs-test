@@ -14,6 +14,7 @@ import search from './routes/search';
 import rankings from './routes/rankings';
 import images from './routes/images';
 import config from './routes/config';
+import attachments from './routes/attachments'; // 1. 引入新路由
 import admin from './routes/admin'; // 1. 引入新路由
 import adminNodes from './routes/adminNodes'; // 1. 引入新路由
 import adminUserGroups from './routes/adminUserGroups'; // 1. 引入新路由
@@ -75,6 +76,7 @@ api.route('/reminders', reminders);
 api.route('/search', search);
 api.route('/rankings', rankings);
 api.route('/images', images);
+api.route('/attachments', attachments); // 2. 挂载附件上传路由
 api.route('/config', config);
 api.route('/admin', admin); // 2. 挂载管理员路由
 api.route('/admin/nodes', adminNodes); // 2. 挂载版块管理路由
@@ -96,6 +98,19 @@ app.get('/r2/:key{.+$}', async (c) => {
   return new Response(object.body as any, {
     headers,
   });
+});
+
+// 新增: 提供附件下载的公共路由
+app.get('/attachments/*', async (c) => {
+  const key = c.req.path.substring(1);
+  const object = await c.env.R2_BUCKET.get(key);
+  if (object === null) return c.notFound();
+
+  // Use the Cloudflare Workers' Headers class for compatibility with R2
+  const headers = new (globalThis as any).Headers();
+  object.writeHttpMetadata(headers);
+  headers.set('etag', object.httpEtag);
+  return new Response(object.body as any, { headers });
 });
 
 app.route('/api', api);
