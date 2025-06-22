@@ -8,7 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import type { ThreadWithDetails, Reply } from '@/types';
 
 export default function EditPostPage() {
-  const { threadId, replyId } = useParams<{ threadId: number; replyId?: number }>();
+  const { threadId, replyId } = useParams<{ threadId: string; replyId?: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
 
