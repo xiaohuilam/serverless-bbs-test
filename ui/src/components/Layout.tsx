@@ -172,9 +172,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <footer className="w-full mt-8">
         <div className="max-w-[960px] mx-auto py-4 px-4 text-center text-xs text-[#666] border-t border-[#CDCDCD]">
           <p>Powered by <a href="https://github.com/serverless-bbs/serverless-bbs" className='font-bold hover:underline hover:text-[#336699]' target="_blank">ServerlessDiscuz!</a></p>
-          <p className="mt-1">
+          <p className="mt-1 text-[12px]">
             <span className='inline-block' style={{ transform: 'rotate(180deg)' }}>©</span>
-            2004-2025 Thanks to Comsenz Inc, Cloudflare Inc...</p>
+            2004-2025 Inspired by <a href='//www.comsenz.com' target='_blank'>Comsenz</a> | Hosted on <a href='//www.cloudflare.com' target='_blank'>Cloudflare</a> | Accelerate by <a href='//edgeone.ai' target='_blank'>Edgeone</a>.
+          </p>
         </div>
       </footer>
     </div>
