@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { authMiddleware } from '../auth/middleware';
-import type { Bindings, Thread, ThreadWithAuthor, ReplyWithAuthor, CommentWithAuthor, User, PollOption, UserVote, ThreadWithDetails } from '../types';
+import type { Bindings, Thread, ThreadWithAuthor, ReplyWithAuthor, CommentWithAuthor, User, PollOption, UserVote, ThreadWithDetails, Reply } from '../types';
 
 const app = new Hono<{ Bindings: Bindings, Variables: { user: User } }>();
 
@@ -39,13 +39,13 @@ app.get('/', zValidator('query', listThreadsSchema), async (c) => {
 
 // 创建一个新帖子
 const createThreadSchema = z.object({
-  nodeId: z.number(),
-  title: z.string().min(2),
-  body: z.string().min(10),
-  type: z.enum(['discussion', 'poll']),
-  readPermission: z.number().int().min(0),
-  pollOptions: z.array(z.string().min(1)).optional(),
-  isAuthorOnly: z.boolean().optional(),
+    nodeId: z.number(),
+    title: z.string().min(2),
+    body: z.string().min(10),
+    type: z.enum(['discussion', 'poll']),
+    readPermission: z.number().int().min(0),
+    pollOptions: z.array(z.string().min(1)).optional(),
+    isAuthorOnly: z.boolean().optional(),
 });
 
 app.post('/', authMiddleware, zValidator('json', createThreadSchema), async (c) => {
@@ -56,7 +56,7 @@ app.post('/', authMiddleware, zValidator('json', createThreadSchema), async (c) 
     const user = c.get('user');
     const now = Math.floor(Date.now() / 1000);
     const db = c.env.DB;
-    
+
     // 使用事务创建帖子和投票选项
     const results = await db.batch([
         db.prepare(`INSERT INTO Threads (node_id, author_id, title, body, type, read_permission, is_author_only, created_at, last_reply_at) 
@@ -66,12 +66,12 @@ app.post('/', authMiddleware, zValidator('json', createThreadSchema), async (c) 
     const newThreadId = results[0].meta.last_row_id;
 
     if (type === 'poll' && pollOptions) {
-        const stmts = pollOptions.map(option => 
+        const stmts = pollOptions.map(option =>
             db.prepare(`INSERT INTO PollOptions (thread_id, option_text) VALUES (?, ?)`).bind(newThreadId, option)
         );
         await db.batch(stmts);
     }
-    
+
     return c.json({ message: '帖子创建成功', threadId: newThreadId }, 201);
 });
 
@@ -82,10 +82,10 @@ app.get('/:id', async (c) => {
     const db = c.env.DB;
     const user = c.get('user');
 
-    try {        
+    try {
         const thread = await db.prepare(`SELECT t.*, u.username as author_username, u.avatar as author_avatar, u.level as author_level FROM Threads t JOIN Users u ON t.author_id = u.id WHERE t.id = ?`).bind(threadId).first<ThreadWithAuthor>();
         if (!thread) return c.json({ error: '帖子未找到' }, 404);
-        
+
         // 权限检查
         if (thread.read_permission) {
             if (!user || thread.read_permission > user.level) {
@@ -135,6 +135,27 @@ app.get('/:id', async (c) => {
     }
 });
 
+// 新增: 更新一个主题帖
+const updateThreadSchema = z.object({
+    title: z.string().min(5, "标题至少需要5个字符"),
+    body: z.string().min(10, "内容至少需要10个字符"),
+});
+app.put('/:threadId', authMiddleware, zValidator('json', updateThreadSchema), async (c) => {
+    const threadId = parseInt(c.req.param('threadId'), 10);
+    const { title, body } = c.req.valid('json');
+    const user = c.get('user')!; // 经过 authMiddleware，user 必定存在
+    const db = c.env.DB;
+
+    // 权限检查：只有作者或管理员可以编辑
+    const thread = await db.prepare("SELECT author_id FROM Threads WHERE id = ?").bind(threadId).first<{ author_id: string }>();
+    if (!thread || (thread.author_id !== user.id && user.role !== 'admin')) {
+        return c.json({ error: "您没有权限编辑此帖子" }, 403);
+    }
+
+    await db.prepare("UPDATE Threads SET title = ?, body = ? WHERE id = ?").bind(title, body, threadId).run();
+    return c.json({ message: "帖子更新成功" });
+});
+
 // 投票接口
 app.post('/:threadId/vote', authMiddleware, zValidator('json', z.object({ optionId: z.number() })), async (c) => {
     const threadId = parseInt(c.req.param('threadId'), 10);
@@ -150,7 +171,7 @@ app.post('/:threadId/vote', authMiddleware, zValidator('json', z.object({ option
         db.prepare("INSERT INTO PollVotes (thread_id, user_id, poll_option_id) VALUES (?, ?, ?)").bind(threadId, user.id, optionId),
         db.prepare("UPDATE PollOptions SET vote_count = vote_count + 1 WHERE id = ?").bind(optionId),
     ]);
-    
+
     return c.json({ message: '投票成功' });
 });
 
@@ -167,7 +188,7 @@ app.post('/:threadId/replies', authMiddleware, zValidator('json', createReplySch
 
     try {
         // 1. 获取原帖作者ID，用于后续创建提醒
-        const originalThread = await db.prepare("SELECT author_id FROM Threads WHERE id = ?").bind(threadId).first<{author_id: string}>();
+        const originalThread = await db.prepare("SELECT author_id FROM Threads WHERE id = ?").bind(threadId).first<{ author_id: string }>();
 
         if (!originalThread) {
             return c.json({ error: "Thread not found" }, 404);
@@ -176,6 +197,8 @@ app.post('/:threadId/replies', authMiddleware, zValidator('json', createReplySch
         const { meta } = await db.prepare(
             `INSERT INTO Replies (thread_id, author_id, created_at, body, reply_to_id) VALUES (?, ?, ?, ?, ?)`
         ).bind(threadId, user.id, now, body, replyToId || null).run(); // 直接插入 body
+
+        const reply = await db.prepare("SELECT * FROM Replies WHERE id = ?").bind(meta.last_row_id).first<Reply>();
 
         const newReplyId = meta.last_row_id;
 
@@ -196,9 +219,9 @@ app.post('/:threadId/replies', authMiddleware, zValidator('json', createReplySch
                  SET reply_count = reply_count + 1 
                  WHERE id = (SELECT node_id FROM Threads WHERE id = ?)`
             ).bind(threadId),
-             c.env.DB.prepare('UPDATE Credits SET balance = balance + 1, last_updated = ? WHERE user_id = ?').bind(now, user.id)
+            c.env.DB.prepare('UPDATE Credits SET balance = balance + 1, last_updated = ? WHERE user_id = ?').bind(now, user.id)
         ]);
-    
+
         // 4. 创建提醒 (如果回复者不是原帖作者)
         if (originalThread.author_id !== user.id) {
             await db.prepare(
@@ -212,6 +235,43 @@ app.post('/:threadId/replies', authMiddleware, zValidator('json', createReplySch
         console.error(e);
         return c.json({ error: 'Failed to post reply' }, 500);
     }
+});
+
+app.get('/:threadId/replies/:replyId', authMiddleware, async (c) => {
+    const replyId = parseInt(c.req.param('replyId'), 10);
+    const user = c.get('user')!;
+    const db = c.env.DB;
+
+    // 权限检查：只有作者或管理员可以编辑
+    const reply = await db.prepare("SELECT * FROM Replies WHERE id = ?").bind(replyId).first<Reply>();
+    if (!reply) {
+        return c.json({ error: "无此回复" }, 403);
+    }
+    if (!['admin', 'moderator'].includes(user.role) && reply.author_id != user.id) {
+        return c.json({ error: "您没有权限查看此回复" }, 403);
+    }
+
+    return c.json(reply);
+});
+
+// 新增: 更新一个回帖的路由
+const updateReplySchema = z.object({ body: z.string().min(1) });
+app.put('/:threadId/replies/:replyId', authMiddleware, zValidator('json', updateReplySchema), async (c) => {
+    const replyId = parseInt(c.req.param('replyId'), 10);
+    const { body } = c.req.valid('json');
+    const user = c.get('user')!;
+    const db = c.env.DB;
+
+    // 权限检查：只有作者或管理员可以编辑
+    const reply = await db.prepare("SELECT * FROM Replies WHERE id = ?").bind(replyId).first<Reply>();
+    if (!['admin', 'moderator'].includes(user.role)) {
+        if (!reply || (reply.author_id !== user.id)) {
+            return c.json({ error: "您没有权限查看此回复" }, 403);
+        }
+    }
+
+    await db.prepare("UPDATE Replies SET body = ? WHERE id = ?").bind(body, replyId).run();
+    return c.json({ message: "回复更新成功" });
 });
 
 export default app;

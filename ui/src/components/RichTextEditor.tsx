@@ -72,9 +72,9 @@ export const RichTextEditor = ({ value, onChange }: { value: string, onChange: (
                      <Button variant="link" size="sm" className="text-xs text-gray-500">全屏</Button>
                 </div>
             </div>
-            
-            <div ref={editorRef} contentEditable onInput={() => onChange(editorRef.current?.innerHTML || '')} className="p-3 min-h-[200px] focus:outline-none text-base" />
-            
+
+            <div ref={editorRef} contentEditable onInput={() => onChange(editorRef.current?.innerHTML || '')} className="p-3 min-h-[200px] focus:outline-none text-base" dangerouslySetInnerHTML={{ __html: value }} />
+
             <input type="file" accept="image/*" ref={imageInputRef} onChange={(e) => e.target.files && handleFileUpload(e.target.files[0], 'image')} className="hidden" />
             <input type="file" ref={attachmentInputRef} onChange={(e) => e.target.files && handleFileUpload(e.target.files[0], 'attachment')} className="hidden" />
 

@@ -8,6 +8,7 @@ import IndexPage from './pages/IndexPage';
 import NodePage from './pages/NodePage';
 import ThreadPage from './pages/ThreadPage';
 import NewThreadPage from './pages/NewThreadPage';
+import EditPostPage from './pages/EditPostPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import NotificationsPage from './pages/NotificationsPage';
@@ -20,10 +21,10 @@ import AdminLoginPage from './pages/admin/LoginPage';
 import AdminDashboardPage from './pages/admin/DashboardPage';
 import AdminUsersPage from './pages/admin/UsersPage';
 import AdminUsersGroupPage from './pages/admin/UserGroupsPage';
-import EditAdminUserGroupPage from './pages/admin/EditUserGroupPage'; // 1. 引入新页面
+import EditAdminUserGroupPage from './pages/admin/EditUserGroupPage';
 import AdminContentPage from './pages/admin/ContentPage';
 import AdminRepliesPage from './pages/admin/RepliesPage';
-import AdminNodesPage from './pages/admin/NodesPage'; // 1. 引入新页面
+import AdminNodesPage from './pages/admin/NodesPage';
 
 import { useAuth } from './hooks/useAuth';
 
@@ -48,15 +49,15 @@ const MainApp = () => {
         <Route path="/" element={<IndexPage />} />
         <Route path="/nodes/:nodeId" element={<NodePage />} />
         <Route path="/threads/:threadId" element={<ThreadPage />} />
-        <Route path="/new-thread/:nodeId" element={<PrivateRoute><NewThreadPage /></PrivateRoute>} />
+        <Route path="/threads/:threadId/update" element={<PrivateRoute><EditPostPage /></PrivateRoute>} />
+        <Route path="/threads/:threadId/replies/:replyId/update" element={<PrivateRoute><EditPostPage /></PrivateRoute>} />
+        <Route path="/nodes/:nodeId/new" element={<PrivateRoute><NewThreadPage /></PrivateRoute>} />
         <Route path="/users/:username" element={<ProfilePage />} />
-        {/* 2. 添加用户主题列表页的路由 */}
         <Route path="/users/:username/threads" element={<UserThreadsPage />} />
         <Route path="/settings" element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
         <Route path="/notifications" element={<PrivateRoute><NotificationsPage /></PrivateRoute>} />
-        <Route path="/search" element={<SearchPage />} /> {/* 2. 添加搜索结果页的路由 */}
-        <Route path="/rankings" element={<RankingsPage />} /> {/* 2. 添加排行榜页面的路由 */}
-        {/* Fallback for any other route inside the main app */}
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/rankings" element={<RankingsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>
