@@ -140,7 +140,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Search className='w-[16px] text-white' />
             </Button>
           </div>
-          <div className='text-xs' style={{ width: '1000px' }}>
+          <div className='text-xs inline-flex items-center' style={{ width: '1000px' }}>
             <b>热搜:</b>
             <span className="text-[#369]">
               香港vps
