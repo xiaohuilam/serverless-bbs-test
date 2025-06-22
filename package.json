@@ -7,11 +7,11 @@
     "ui"
   ],
   "scripts": {
-    "dev": "npm-run-all --parallel dev:*",
+    "dev--back": "npm-run-all --parallel dev:*",
     "dev:ui": "npm run dev --workspace=ui",
-    "dev:worker": "npm run dev --workspace=worker",
+    "dev": "npm run dev --workspace=worker",
     "build": "npm run build --workspace=ui",
-    "deploy": "npm i --workspace=ui && npm i --workspace=worker && npm run build && wrangler pages deploy ui/dist/ && wrangler deploy",
+    "deploy": "npm i --workspace=ui && npm i --workspace=worker && npm run build && wrangler deploy",
     "db:migrate": "wrangler d1 migrations apply community-db --local --env dev",
     "db:migrate:prod": "wrangler d1 migrations apply community-db --remote"
   },
@@ -33,6 +33,6 @@
     "toml": "^3.0.0",
     "typescript": "^5.2.2",
     "vite": "^5.2.0",
-    "wrangler": "^3.57.2"
+    "wrangler": "^4.20.5"
   }
 }

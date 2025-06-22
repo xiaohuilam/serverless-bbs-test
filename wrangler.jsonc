@@ -1,21 +1,22 @@
 {
   "name": "community-board",
   "main": "worker/src/index.ts",
-  "compatibility_date": "2024-05-30",
+  "compatibility_date": "2025-06-20",
   "compatibility_flags": [
     "nodejs_compat"
   ],
   "vars": {
     "RP_NAME": "Community Board",
     "RP_SUBTITLE": "An opensource-friendly forum",
-    "RP_ID": "serverless-bbs.anquanssl.com",
-    "ORIGIN": "https://serverless-bbs.anquanssl.com",
-    "R2_PUBLIC_URL": "https://pub-9dc29af496fa499ca19c82128682e1bf.r2.dev",
-    "API_WORKER_URL": "https://serverless-bbs-api.anquanssl.com",
-    "REGISTER_ENABLED": false
+    "R2_PUBLIC_URL": "/r2",
+    "API_WORKER_URL": "",
+    "REGISTER_ENABLED": true
   },
-  "sites": {
-    "bucket": "./ui/dist"
+  "assets": {
+    "directory": "./ui/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/r2/*"]
   },
   "d1_databases": [
     {
@@ -45,8 +46,6 @@
       "vars": {
         "RP_NAME": "开发版论坛",
         "RP_SUBTITLE": "本地测试环境",
-        "RP_ID": "localhost",
-        "ORIGIN": "//localhost:5173",
         "R2_PUBLIC_URL": "//localhost:8787/r2",
         "API_WORKER_URL": "//localhost:8787",
         "REGISTER_ENABLED": true

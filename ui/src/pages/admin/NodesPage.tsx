@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from "@/components/ui/use-toast";
 import { GripVertical, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface Node {
   id: number | string; // 使用联合类型以区分新旧
@@ -82,11 +83,11 @@ const NodesPage = () => {
 
   return (
     <AdminLayout>
-      <div className="">
+      <div>
 
         <div className="flex border-b border-gray-300 mb-[19px]">
+          <Link to="/admin/setting" className="px-0 mr-5 pt-0 py-2 text-[14px] text-gray-600 hover:text-[#336699]">站点设置</Link>
           <div className="px-0 mr-5 pt-0 py-2 text-[14px] font-bold text-[#336699] border-b-2 border-[#336699] -mb-px">版块管理</div>
-          {/* <Link to="/admin/content/replies" className="px-0 mr-5 pt-0 py-2 text-[14px] text-gray-600 hover:text-[#336699]">回帖管理</Link> */}
         </div>
 
         <div className="space-y-6">

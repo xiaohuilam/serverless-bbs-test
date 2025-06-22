@@ -13,11 +13,7 @@ import type { Bindings, Passkey } from '../types';
 import { getOrCreateUser, getUserPasskeys, getPasskeyById } from '../lib/passkeys';
 
 // Extend the Hono Bindings type to include the variables from wrangler.toml
-type AuthBindings = Bindings & {
-  RP_NAME: string;
-  RP_ID: string;
-  ORIGIN: string;
-};
+type AuthBindings = Bindings;
 
 const app = new Hono<{ Bindings: AuthBindings }>();
 
@@ -25,7 +21,6 @@ const app = new Hono<{ Bindings: AuthBindings }>();
 const registerChallengeSchema = z.object({
   username: z.string().min(3).max(50),
   email: z.string().email(),
-  //   rpID: z.string().min(5).max(128),
 });
 
 app.post('/register/challenge', zValidator('json', registerChallengeSchema), async (c) => {
@@ -33,13 +28,13 @@ app.post('/register/challenge', zValidator('json', registerChallengeSchema), asy
     return c.json({ error: `Registration is disabled` }, 400);
   }
   const { username, email } = c.req.valid('json');
-  const { RP_NAME, RP_ID } = c.env;
+  const { RP_NAME } = c.env;
   const user = await getOrCreateUser(c.env.DB, username, email);
   const userPasskeys = await getUserPasskeys(c.env.DB, user.id);
-
+  const url = new URL(c.req.url);
   const options = await generateRegistrationOptions({
     rpName: RP_NAME,
-    rpID: RP_ID,
+    rpID: url.hostname,
     userID: new TextEncoder().encode(user.id), // FIX: userID must be a BufferSource
     userName: user.username,
     // Prevent users from re-registering the same authenticator
@@ -63,7 +58,7 @@ app.post('/register/challenge', zValidator('json', registerChallengeSchema), asy
 app.post('/register/verify', async (c) => {
   // The user's ID is no longer sent from the client
   const { response } = await c.req.json<{ response: RegistrationResponseJSON }>();
-  const { ORIGIN, RP_ID } = c.env;
+  const url = new URL(c.req.url);
 
   if (!response) {
     return c.json({ error: 'Invalid request body' }, 400);
@@ -91,8 +86,8 @@ app.post('/register/verify', async (c) => {
     verification = await verifyRegistrationResponse({
       response,
       expectedChallenge,
-      expectedOrigin: ORIGIN,
-      expectedRPID: RP_ID,
+      expectedOrigin: url.origin,
+      expectedRPID: url.hostname,
       requireUserVerification: false,
     });
   } catch (error) {
@@ -131,9 +126,9 @@ app.post('/register/verify', async (c) => {
 
 const loginChallengeSchema = z.object({});
 app.post('/login/challenge', zValidator('json', loginChallengeSchema), async (c) => {
-  // const { rpID } = c.req.valid('json');
+  const url = new URL(c.req.url);
   const options = await generateAuthenticationOptions({
-    rpID: c.env.RP_ID,
+    rpID: url.hostname,
     userVerification: 'preferred',
   });
 
@@ -146,7 +141,7 @@ app.post('/login/challenge', zValidator('json', loginChallengeSchema), async (c)
 
 app.post('/login/verify', async (c) => {
   const response = await c.req.json<AuthenticationResponseJSON>();
-  const { ORIGIN, RP_ID } = c.env;
+  const url = new URL(c.req.url);
 
   if (!response) {
     return c.json({ error: 'Invalid request body' }, 400);
@@ -178,8 +173,8 @@ app.post('/login/verify', async (c) => {
     verification = await verifyAuthenticationResponse({
       response,
       expectedChallenge: challenge,
-      expectedOrigin: ORIGIN,
-      expectedRPID: RP_ID,
+      expectedOrigin: url.origin,
+      expectedRPID: url.hostname,
       authenticator: {
         credentialID: passkey.id,
         credentialPublicKey: new Uint8Array(passkey.pubkey_blob),

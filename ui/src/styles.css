@@ -53,15 +53,17 @@
     --discuz-secondary-foreground: #2B7ACD;
   }
 
+  h1,h2,h3,h4,h5,h6 {
+    font-size: auto;
+  }
+
   .dark {
     /* 您可以为暗色模式定义不同的 HSL 值 */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
     /* ... etc */
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }

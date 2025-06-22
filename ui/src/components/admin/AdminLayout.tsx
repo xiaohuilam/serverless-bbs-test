@@ -13,7 +13,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const mainNavItems = [
     { href: '/admin/dashboard', label: '首页' },
     // { href: '/admin/settings', label: '全局' },
-    { href: '/admin/setting/nodes', label: '论坛设置' },
+    { href: '/admin/setting', label: '论坛设置' },
     { href: '/admin/users', label: '用户' },
     { href: '/admin/content/threads', label: '内容' },
   ];
@@ -23,8 +23,8 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     if (location.pathname.startsWith('/admin/setting')) {
       return (
         <ul>
-          <li><Link to="/admin/setting" className="block py-1 px-4 text-xs text-gray-700 hover:bg-gray-200">站点信息</Link></li>
-          <li><Link to="/admin/setting/nodes" className={`block py-1 px-4 text-xs hover:bg-gray-200 ${location.pathname === '/admin/setting/nodes' ? 'bg-gray-200' : ''}`}>版块管理</Link></li>
+          <li><Link to="/admin/setting" className={`block py-1 px-4 text-xs hover:bg-gray-200 ${location.pathname === '/admin/setting' ? '' : 'text-gray-700'}`}>站点信息</Link></li>
+          <li><Link to="/admin/setting/nodes" className={`block py-1 px-4 text-xs hover:bg-gray-200 ${location.pathname === '/admin/setting/nodes' ? '' : 'text-gray-700'}`}>版块管理</Link></li>
           <li><Link to="/admin/setting/registration" className="block py-1 px-4 text-xs text-gray-700 hover:bg-gray-200">注册设置</Link></li>
         </ul>
       );
@@ -56,9 +56,9 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex h-screen bg-[#f3f3f3] font-sans">
       {/* 顶部导航栏 */}
-      <header className="absolute top-0 left-0 right-0 h-[46px] bg-[#235179] text-white flex items-center justify-between px-6 z-20">
+      <header className="absolute top-0 left-0 right-0 h-[46px] bg-[#235179] text-white flex items-center justify-between px-4 z-20">
         <div className="flex items-center">
-          <h1 className="text-[16px] font-bold mr-4">ServerlessDiscuz!</h1>
+          <h1 className="text-[16px] font-bold mr-7">ServerlessDiscuz!</h1>
           <nav className="flex items-center space-x-2">
             {mainNavItems.map(item => (
               <Link

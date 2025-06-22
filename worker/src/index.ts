@@ -18,13 +18,14 @@ import attachments from './routes/attachments'; // 1. 引入新路由
 import admin from './routes/admin'; // 1. 引入新路由
 import adminNodes from './routes/adminNodes'; // 1. 引入新路由
 import adminUserGroups from './routes/adminUserGroups'; // 1. 引入新路由
+import adminSettings from './routes/adminSettings'; // 1. 引入新路由
 import { tryAuthMiddleware } from './auth/tryAuthMiddleware';
 
 const app = new Hono<{ Bindings: Bindings }>();
 
 app.use('*', logger());
 app.use('/api/*', cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:8788', 'https://serverless-bbs.pages.dev', 'https://*.serverless-bbs.pages.dev', 'https://serverless-bbs.anquanssl.com'],
+  origin: ['http://localhost:5173', 'http://127.0.0.1:8787', 'https://serverless-bbs.pages.dev', 'https://*.serverless-bbs.pages.dev', 'https://serverless-bbs.anquanssl.com'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   maxAge: 31560000,
@@ -33,37 +34,6 @@ app.use('/api/*', cors({
 const api = new Hono();
 
 app.use('*', tryAuthMiddleware);
-
-app.get('/', async (c) => {
-  const headers = new (globalThis as any).Headers();
-  headers.set('Content-Type', `text/html; charset=utf-8`);
-  const html = `<!DOCTYPE html>
-<html>
-
-<head>
-  <meta charset="utf-8">
-  <title>API 说明</title>
-</head>
-<body>
-  此地址为API地址，您还需要打包部署前端页面，<br/>请修改 <kbd>wrangler.jsonc</kbd> 中的
-<pre>
-{
-  "vars": {
-    "RP_ID": "<span class='x'></span>",
-    "ORIGIN": "https://<span class='x'></span>",
-  }
-}</pre>
-后再执行 <kbd>yarn deploy</kbd> 部署到 Pages。详细部署教程见：<a href="https://github.com/serverless-bbs/serverless-bbs/blob/master/%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97.md">部署指南.md</a>
-<script>
-document.querySelectorAll('.x').forEach(e => e.innerHTML = location.hostname)
-</script>
-</body>
-</html>`;
-
-  return new Response(html, {
-    headers,
-  });
-});
 
 api.route('/auth', auth);
 api.route('/nodes', nodes);
@@ -81,6 +51,7 @@ api.route('/config', config);
 api.route('/admin', admin); // 2. 挂载管理员路由
 api.route('/admin/nodes', adminNodes); // 2. 挂载版块管理路由
 api.route('/admin/groups', adminUserGroups); // 2. 挂载用户组管理路由
+api.route('/admin/settings', adminSettings); // 2. 挂载站点设置管理路由
 
 app.get('/r2/:key{.+$}', async (c) => {
   const key = c.req.param('key');
@@ -114,6 +85,10 @@ app.get('/attachments/*', async (c) => {
 });
 
 app.route('/api', api);
+
+app.all('*', async (c) => {
+  return c.env.ASSETS.fetch(<any> c.req);
+});
 
 app.onError((err, c) => {
   console.error(`${err}`);

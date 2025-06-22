@@ -1,17 +1,3 @@
-import {
-  generateRegistrationOptions,
-  verifyRegistrationResponse,
-  generateAuthenticationOptions,
-  verifyAuthenticationResponse,
-} from '@simplewebauthn/server';
-import type {
-  GenerateRegistrationOptionsOpts,
-  GenerateAuthenticationOptionsOpts,
-  VerifyRegistrationResponseOpts,
-  VerifyAuthenticationResponseOpts,
-  VerifiedRegistrationResponse,
-  VerifiedAuthenticationResponse,
-} from '@simplewebauthn/server';
 import type { Passkey, User } from '../types';
 import type { D1Database } from '@cloudflare/workers-types';
 
@@ -34,7 +20,9 @@ export async function getOrCreateUser(db: D1Database, username: string, email: s
     id: newUserId,
     username,
     email,
-    created_at: now
+    created_at: now,
+    level: 1, // 默认等级，可根据实际需求调整
+    role: 'user' // 默认角色，可根据实际需求调整
   };
 
   // 使用 batch 确保原子性操作

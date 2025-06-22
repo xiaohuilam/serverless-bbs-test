@@ -25,6 +25,7 @@ import EditAdminUserGroupPage from './pages/admin/EditUserGroupPage';
 import AdminContentPage from './pages/admin/ContentPage';
 import AdminRepliesPage from './pages/admin/RepliesPage';
 import AdminNodesPage from './pages/admin/NodesPage';
+import AdminSiteSettingsPage from './pages/admin/SiteSettingsPage'; // 1. 引入新页面
 
 import { useAuth } from './hooks/useAuth';
 
@@ -76,6 +77,7 @@ function App() {
         <Route path="/admin/users/groups/:levelId" element={<AdminPrivateRoute><EditAdminUserGroupPage /></AdminPrivateRoute>} /> {/* 2. 添加权限编辑路由 */}
         <Route path="/admin/content/threads" element={<AdminPrivateRoute><AdminContentPage /></AdminPrivateRoute>} />
         <Route path="/admin/content/replies" element={<AdminPrivateRoute><AdminRepliesPage /></AdminPrivateRoute>} /> {/* 2. 添加回帖管理路由 */}
+        <Route path="/admin/setting" element={<AdminPrivateRoute><AdminSiteSettingsPage /></AdminPrivateRoute>} /> {/* 2. 添加站点设置路由 */}
         <Route path="/admin/setting/nodes" element={<AdminPrivateRoute><AdminNodesPage /></AdminPrivateRoute>} /> {/* 2. 添加版块管理路由 */}
         <Route path="/admin/*" element={<Navigate to="/admin/login" replace />} />
 

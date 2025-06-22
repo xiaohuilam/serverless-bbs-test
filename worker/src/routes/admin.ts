@@ -43,8 +43,9 @@ const app = new Hono<{ Bindings: Bindings }>();
 
 // 1. Admin Login - Generate Challenge
 app.post('/login/challenge', async (c) => {
+  const url = new URL(c.req.url);
   const options = await generateAuthenticationOptions({
-    rpID: c.env.RP_ID,
+    rpID: url.hostname,
     userVerification: 'preferred',
   });
   console.log(`challenge:${options.challenge}`);
@@ -55,7 +56,7 @@ app.post('/login/challenge', async (c) => {
 // 2. Admin Login - Verify Response
 app.post('/login/verify', async (c) => {
   const response = await c.req.json<AuthenticationResponseJSON>();
-  const { ORIGIN, RP_ID } = c.env;
+  const url = new URL(c.req.url);
 
   if (!response) {
     return c.json({ error: 'Invalid request body' }, 400);
@@ -88,8 +89,8 @@ app.post('/login/verify', async (c) => {
     verification = await verifyAuthenticationResponse({
       response,
       expectedChallenge: challenge,
-      expectedOrigin: ORIGIN,
-      expectedRPID: RP_ID,
+      expectedOrigin: url.origin,
+      expectedRPID: url.hostname,
       authenticator: {
         credentialID: passkey.id,
         credentialPublicKey: new Uint8Array(passkey.pubkey_blob),

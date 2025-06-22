@@ -1,4 +1,4 @@
-import type { D1Database, KVNamespace, R2Bucket } from '@cloudflare/workers-types';
+import type { D1Database, fetch, Fetcher, FetchEvent, KVNamespace, R2Bucket } from '@cloudflare/workers-types';
 
 // Bindings
 export type Bindings = {
@@ -7,11 +7,9 @@ export type Bindings = {
   R2_BUCKET: R2Bucket;
   RP_NAME: string;
   RP_SUBTITLE: string;
-  RP_ID: string;
-  ORIGIN: string;
   REGISTER_ENABLED: boolean;
   R2_PUBLIC_URL: string;
-  API_WORKER_URL: string;
+  ASSETS: Fetcher;
 };
 
 // User-related types
