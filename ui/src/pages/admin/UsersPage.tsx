@@ -105,7 +105,7 @@ const UsersPage = () => {
               <td className="p-2 space-x-2">
                 <button onClick={() => openEditModal(user)} className="text-blue-600 hover:underline">编辑</button>
                 <Link to={`/admin/content/threads?author=${user.id}`} className="text-blue-600 hover:underline truncate">管理帖子</Link>
-                <Link to={`/admin/content/reply?author=${user.id}`} className="text-blue-600 hover:underline truncate">管理回复</Link>
+                <Link to={`/admin/content/replies?author=${user.id}`} className="text-blue-600 hover:underline truncate">管理回复</Link>
               </td>
             </tr>
           ))}

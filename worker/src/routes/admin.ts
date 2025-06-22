@@ -218,19 +218,116 @@ const moveSchema = z.object({
 });
 app.put('/threads/move', zValidator('json', moveSchema), async (c) => {
     const { ids, targetNodeId } = c.req.valid('json');
+    const db = c.env.DB;
     if (ids.length === 0) return c.json({ message: "No threads selected" }, 400);
 
-    const placeholders = ids.map(() => '?').join(',');
-    const query = `UPDATE Threads SET node_id = ? WHERE id IN (${placeholders})`;
-    await c.env.DB.prepare(query).bind(targetNodeId, ...ids).run();
+    try {
+        // 1. 获取所有待移动帖子的原始版块ID和回复数
+        const placeholders = ids.map(() => '?').join(',');
+        const threadsQuery = `SELECT id, node_id, reply_count FROM Threads WHERE id IN (${placeholders})`;
+        const { results: threadsToMove } = await db.prepare(threadsQuery).bind(...ids).all<{id: number, node_id: number, reply_count: number}>();
+        
+        // 2. 按版块聚合需要更新的统计数据
+        const sourceNodeUpdates = new Map<number, { thread_decrement: number, reply_decrement: number }>();
+        let targetThreadIncrement = 0;
+        let targetReplyIncrement = 0;
 
-    return c.json({ message: `操作成功: ${ids.length} 个帖子已移动` });
+        for (const thread of threadsToMove) {
+            // **核心修复**：只有当源版块和目标版块不同时，才进行统计更新
+            if (thread.node_id !== targetNodeId) {
+                // 记录源版块需要减少的计数
+                const sourceStats = sourceNodeUpdates.get(thread.node_id) || { thread_decrement: 0, reply_decrement: 0 };
+                sourceStats.thread_decrement += 1;
+                sourceStats.reply_decrement += thread.reply_count;
+                sourceNodeUpdates.set(thread.node_id, sourceStats);
+
+                // 累加目标版块需要增加的计数
+                targetThreadIncrement += 1;
+                targetReplyIncrement += thread.reply_count;
+            }
+        }
+
+        // 3. 构建一个事务来执行所有数据库更新
+        const batch = [];
+
+        // 3a. 为每个需要更新的源版块创建计数减少的语句
+        for (const [nodeId, stats] of sourceNodeUpdates.entries()) {
+            batch.push(
+                db.prepare(`UPDATE Nodes SET thread_count = thread_count - ?, reply_count = reply_count - ? WHERE id = ?`)
+                  .bind(stats.thread_decrement, stats.reply_decrement, nodeId)
+            );
+        }
+        
+        // 3b. 如果有实际的移动发生，为目标版块创建计数增加的语句
+        if (targetThreadIncrement > 0) {
+            batch.push(
+                db.prepare(`UPDATE Nodes SET thread_count = thread_count + ?, reply_count = reply_count + ? WHERE id = ?`)
+                  .bind(targetThreadIncrement, targetReplyIncrement, targetNodeId)
+            );
+        }
+
+        // 3c. 创建移动帖子的语句 (这个操作总是执行)
+        const moveQuery = `UPDATE Threads SET node_id = ? WHERE id IN (${placeholders})`;
+        batch.push(db.prepare(moveQuery).bind(targetNodeId, ...ids));
+        
+        // 4. 执行事务
+        if (batch.length > 0) {
+            await db.batch(batch);
+        }
+        
+        return c.json({ message: `操作成功: ${ids.length} 个帖子已移动` });
+    } catch (error) {
+        console.error("Failed to move threads:", error);
+        return c.json({ error: "移动帖子时发生错误" }, 500);
+    }
 });
 
+// Delete threads (FIXED: Now correctly updates node stats)
+app.delete('/threads', zValidator('json', z.object({ ids: z.array(z.number()) })), async (c) => {
+    const { ids } = c.req.valid('json');
+    const db = c.env.DB;
+    if (ids.length === 0) return c.json({ message: "没有选择任何帖子" }, 400);
 
-// Delete threads
-app.delete('/threads', zValidator('json', z.object({ ids: z.array(z.number()) })), async (c) => { /* ... */ });
+    try {
+        // 1. 获取所有待删除帖子的信息 (版块ID, 回复数)
+        const placeholders = ids.map(() => '?').join(',');
+        const threadsQuery = `SELECT node_id, reply_count FROM Threads WHERE id IN (${placeholders})`;
+        const { results: threadsToDelete } = await db.prepare(threadsQuery).bind(...ids).all<{node_id: number, reply_count: number}>();
+        
+        // 2. 按版块聚合需要更新的统计数据
+        const nodeStatUpdates = new Map<number, { thread_decrement: number, reply_decrement: number }>();
+        for (const thread of threadsToDelete) {
+            const stats = nodeStatUpdates.get(thread.node_id) || { thread_decrement: 0, reply_decrement: 0 };
+            stats.thread_decrement += 1;
+            stats.reply_decrement += thread.reply_count;
+            nodeStatUpdates.set(thread.node_id, stats);
+        }
 
+        // 3. 构建一个事务来执行所有数据库更新
+        const batch = [];
+
+        // 3a. 为每个受影响的版块创建更新统计的语句
+        for (const [nodeId, stats] of nodeStatUpdates.entries()) {
+            batch.push(
+                db.prepare(`UPDATE Nodes SET thread_count = thread_count - ?, reply_count = reply_count - ? WHERE id = ?`)
+                  .bind(stats.thread_decrement, stats.reply_decrement, nodeId)
+            );
+        }
+        
+        // 3b. 创建删除帖子的语句 (依赖于 ON DELETE CASCADE 来删除相关回复等)
+        const deleteQuery = `DELETE FROM Threads WHERE id IN (${placeholders})`;
+        batch.push(db.prepare(deleteQuery).bind(...ids));
+
+        // 4. 执行事务
+        await db.batch(batch);
+        
+        return c.json({ message: `${ids.length} 个帖子及其所有回复已成功删除。` });
+
+    } catch (error) {
+        console.error("Failed to delete threads:", error);
+        return c.json({ error: "删除帖子时发生错误" }, 500);
+    }
+});
 
 // 新增：Get replies with search
 app.get('/replies', async (c) => {
