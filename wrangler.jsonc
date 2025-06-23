@@ -39,37 +39,5 @@
   ],
   "dev": {
     "port": 8787
-  },
-  "env": {
-    "dev": {
-      "vars": {
-        "RP_NAME": "开发版论坛",
-        "RP_SUBTITLE": "本地测试环境",
-        "R2_PUBLIC_URL": "//localhost:8787/r2",
-        "REGISTER_ENABLED": true
-      },
-      "d1_databases": [
-        {
-          "binding": "DB",
-          "database_name": "community-db",
-          "database_id": "your-d1-database-id",
-          "migrations_dir": "worker/migrations"
-        }
-      ],
-      "kv_namespaces": [
-        {
-          "binding": "KV_SESSIONS",
-          "id": "your-kv-sessions-id",
-          "preview_id": "your-kv-sessions-preview-id"
-        }
-      ],
-      "r2_buckets": [
-        {
-          "binding": "R2_BUCKET",
-          "bucket_name": "community-assets",
-          "preview_bucket_name": "community-assets-preview"
-        }
-      ]
-    }
   }
 }
