@@ -9,7 +9,6 @@
     "RP_NAME": "Community Board",
     "RP_SUBTITLE": "An opensource-friendly forum",
     "R2_PUBLIC_URL": "/r2",
-    "API_WORKER_URL": "",
     "REGISTER_ENABLED": true
   },
   "assets": {
@@ -47,7 +46,6 @@
         "RP_NAME": "开发版论坛",
         "RP_SUBTITLE": "本地测试环境",
         "R2_PUBLIC_URL": "//localhost:8787/r2",
-        "API_WORKER_URL": "//localhost:8787",
         "REGISTER_ENABLED": true
       },
       "d1_databases": [

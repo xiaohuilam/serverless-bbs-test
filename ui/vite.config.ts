@@ -1,14 +1,9 @@
 import path from "path"
 import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
-import fs from 'fs'
+import { cloudflare } from "@cloudflare/vite-plugin";
 
-const wranglerConfig = JSON.parse(fs.readFileSync('../wrangler.jsonc', 'utf-8'));
-const apiWorkerUrl = wranglerConfig.vars.API_WORKER_URL;
-
-export default defineConfig(({ command }) => {
-  const isDev = command === 'serve';
-
+export default defineConfig(({ mode, command, isSsrBuild, isPreview }) => {
   return {
     plugins: [react()],
     resolve: {
@@ -17,7 +12,9 @@ export default defineConfig(({ command }) => {
       },
     },
     define: {
-      'import.meta.env.API_WORKER_URL': JSON.stringify(isDev ? 'http://localhost:8787' : apiWorkerUrl)
+      plugins: [
+        cloudflare({ viteEnvironment: { name: "ssr" } }),
+      ],
     },
     // 配置开发服务器代理，将 /api 请求转发到 wrangler dev 运行的 worker
     server: {

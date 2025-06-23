@@ -14,7 +14,7 @@ export default function AdminLoginPage() {
     setIsLoading(true);
     try {
       const authOptions = await apiClient.post<PublicKeyCredentialRequestOptionsJSON>('/admin/login/challenge', {});
-      const assertion = await startAuthentication(authOptions);
+      const assertion = await startAuthentication({ optionsJSON: authOptions });
       const { verified, token } = await apiClient.post<{ verified: boolean; token: string }>('/admin/login/verify', assertion);
 
       if (verified && token) {

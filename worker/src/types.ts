@@ -9,7 +9,6 @@ export type Bindings = {
   RP_SUBTITLE: string;
   REGISTER_ENABLED: boolean;
   R2_PUBLIC_URL: string;
-  API_WORKER_URL: string;
   ASSETS: Fetcher;
 };
 

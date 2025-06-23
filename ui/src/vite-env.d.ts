@@ -13,7 +13,6 @@ declare module '*.svg' {
 // 扩展 Vite 的 import.meta.env 类型定义
 interface ImportMetaEnvExt extends ImportMetaEnv {
   readonly VITE_R2_PUBLIC_URL: string;
-  readonly VITE_API_WORKER_URL: string;
   // 您可以在这里添加更多从 .env 文件或 vite.config.js 注入的环境变量
 }
 
