@@ -1,7 +1,6 @@
 {
   "name": "community-board",
   "main": "worker/src/index.ts",
-  "YARN_VERSION": "1.22.22",
   "compatibility_date": "2025-06-20",
   "compatibility_flags": [
     "nodejs_compat"
@@ -42,9 +41,6 @@
     "port": 8787
   },
   "env": {
-    "production": {
-      "YARN_VERSION": "1.22.22"
-    },
     "dev": {
       "vars": {
         "RP_NAME": "开发版论坛",
