@@ -41,6 +41,9 @@
     "port": 8787
   },
   "env": {
+    "production": {
+      "YARN_VERSION": "1.22.22"
+    },
     "dev": {
       "vars": {
         "RP_NAME": "开发版论坛",
