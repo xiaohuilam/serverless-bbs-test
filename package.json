@@ -2,7 +2,6 @@
   "name": "serverless-bbs",
   "private": true,
   "version": "1.0.0",
-  "type": "module",
   "packageManager": "yarn@4.3.1",
   "scripts": {
     "dev": "concurrently \"yarn:dev:ui\" \"yarn:dev:worker\"",
