@@ -2,3 +2,13 @@ node_modules/
 .wrangler/
 ui/dist
 yarn-error.log
+
+# Yarn
+# =========================
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
