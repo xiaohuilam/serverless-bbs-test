@@ -64,12 +64,12 @@
     /* ... etc */
   }
 
-  * {
+  /* * {
     @apply border-border;
-  }
+  } */
 
   body {
-    @apply bg-background text-foreground;
+    /* @apply bg-background text-foreground; */
     font-family: Tahoma, Arial, Helvetica, sans-serif;
     font-size: 12px;
   }
