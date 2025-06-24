@@ -1,5 +1,5 @@
 {
-  "name": "serverless-bbs-test",
+  "name": "community-board",
   "main": "worker/src/index.ts",
   "compatibility_date": "2025-06-20",
   "compatibility_flags": [
