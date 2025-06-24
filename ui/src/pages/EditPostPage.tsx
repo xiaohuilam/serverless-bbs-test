@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { useToast } from "@/components/ui/use-toast";
-import type { ThreadWithDetails, Reply } from '@/types';
+import type { ThreadWithDetails, Reply } from '@/../../worker/src/types';
 
 export default function EditPostPage() {
   const { threadId, replyId } = useParams<{ threadId: string; replyId?: string }>();

@@ -9,7 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Link } from 'react-router-dom';
 import { Pin } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Node } from '@/types';
+import { Node } from '@/../../worker/src/types';
 
 interface AdminThread {
   id: number;

@@ -44,7 +44,8 @@ export type Reply = {
   thread_id: number;
   author_id: string;
   created_at: number;
-  body: string; // 不再是 body
+  body: string;
+  is_author_only: boolean;
   reply_to_id: number | null;
 };
 export type ReplyWithAuthor = Reply & {

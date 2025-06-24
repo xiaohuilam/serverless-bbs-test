@@ -83,14 +83,16 @@ app.post('/login/verify', async (c) => {
     return c.json({ error: 'Credential not registered' }, 400);
   }
 
+  const expectedRPID = 'undefined' != typeof c.env.RP_ID && c.env.RP_ID ? c.env.RP_ID : url.hostname;
+  const expectedOrigin = 'undefined' != typeof c.env.ORIGIN && c.env.ORIGIN ? c.env.ORIGIN : url.origin;
   // Verify the Passkey response
   let verification;
   try {
     verification = await verifyAuthenticationResponse({
       response,
       expectedChallenge: challenge,
-      expectedOrigin: url.origin,
-      expectedRPID: url.hostname,
+      expectedOrigin,
+      expectedRPID,
       authenticator: {
         credentialID: passkey.id,
         credentialPublicKey: new Uint8Array(passkey.pubkey_blob),

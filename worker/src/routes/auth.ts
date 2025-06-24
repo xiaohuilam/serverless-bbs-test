@@ -32,9 +32,12 @@ app.post('/register/challenge', zValidator('json', registerChallengeSchema), asy
   const user = await getOrCreateUser(c.env.DB, username, email);
   const userPasskeys = await getUserPasskeys(c.env.DB, user.id);
   const url = new URL(c.req.url);
+
+  // If have env var RP_ID, read it, or use url.hostname
+  const rpID = 'undefined' != typeof c.env.RP_ID && c.env.RP_ID ? c.env.RP_ID : url.hostname;
   const options = await generateRegistrationOptions({
     rpName: RP_NAME,
-    rpID: url.hostname,
+    rpID,
     userID: new TextEncoder().encode(user.id), // FIX: userID must be a BufferSource
     userName: user.username,
     // Prevent users from re-registering the same authenticator
@@ -127,8 +130,9 @@ app.post('/register/verify', async (c) => {
 const loginChallengeSchema = z.object({});
 app.post('/login/challenge', zValidator('json', loginChallengeSchema), async (c) => {
   const url = new URL(c.req.url);
+  const rpID = 'undefined' != typeof c.env.RP_ID && c.env.RP_ID ? c.env.RP_ID : url.hostname;
   const options = await generateAuthenticationOptions({
-    rpID: url.hostname,
+    rpID: rpID,
     userVerification: 'preferred',
   });
 
@@ -167,14 +171,16 @@ app.post('/login/verify', async (c) => {
   if (!passkey) {
     return c.json({ error: 'Credential not registered' }, 400);
   }
+  const expectedRPID = 'undefined' != typeof c.env.RP_ID && c.env.RP_ID ? c.env.RP_ID : url.hostname;
+  const expectedOrigin = 'undefined' != typeof c.env.ORIGIN && c.env.ORIGIN ? c.env.ORIGIN : url.origin;
 
   let verification;
   try {
     verification = await verifyAuthenticationResponse({
       response,
       expectedChallenge: challenge,
-      expectedOrigin: url.origin,
-      expectedRPID: url.hostname,
+      expectedOrigin,
+      expectedRPID,
       authenticator: {
         credentialID: passkey.id,
         credentialPublicKey: new Uint8Array(passkey.pubkey_blob),
