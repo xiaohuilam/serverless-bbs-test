@@ -44,8 +44,10 @@ const app = new Hono<{ Bindings: Bindings }>();
 // 1. Admin Login - Generate Challenge
 app.post('/login/challenge', async (c) => {
   const url = new URL(c.req.url);
+  const RPID = 'undefined' != typeof c.env.RP_ID && c.env.RP_ID ? c.env.RP_ID : url.hostname;
+
   const options = await generateAuthenticationOptions({
-    rpID: url.hostname,
+    rpID: RPID,
     userVerification: 'preferred',
   });
   console.log(`challenge:${options.challenge}`);

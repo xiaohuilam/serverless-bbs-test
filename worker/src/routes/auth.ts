@@ -84,13 +84,16 @@ app.post('/register/verify', async (c) => {
     return c.json({ error: 'Challenge expired or not found. Please try again.' }, 400);
   }
 
+  const expectedRPID = 'undefined' != typeof c.env.RP_ID && c.env.RP_ID ? c.env.RP_ID : url.hostname;
+  const expectedOrigin = 'undefined' != typeof c.env.ORIGIN && c.env.ORIGIN ? c.env.ORIGIN : url.origin;
+
   let verification;
   try {
     verification = await verifyRegistrationResponse({
       response,
       expectedChallenge,
-      expectedOrigin: url.origin,
-      expectedRPID: url.hostname,
+      expectedOrigin,
+      expectedRPID,
       requireUserVerification: false,
     });
   } catch (error) {
