@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from './ui/button';
 import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
+// import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Link from '@tiptap/extension-link';
@@ -50,9 +50,9 @@ export const RichTextEditor = ({ value, onChange }: { value: string, onChange: (
 
     const editor = useEditor({
         extensions: [
-            StarterKit.configure({
-                heading: { levels: [1, 2, 3, 4, 5, 6] },
-            }),
+            // StarterKit.configure({
+            //     heading: { levels: [1, 2, 3, 4, 5, 6] },
+            // }),
             Underline,
             TextAlign.configure({ types: ['heading', 'paragraph'] }),
             Link.configure({ openOnClick: false }),
