@@ -3,15 +3,16 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "packageManager": "npm@10.9.2",
   "scripts": {
-    "dev": "yarn concurrently \"yarn:dev:ui\" \"yarn:dev:worker\"",
+    "dev": "concurrently \"yarn:dev:ui\" \"yarn:dev:worker\"",
     "dev:ui": "vite ui",
     "dev:worker": "wrangler dev",
     "start": "wrangler dev",
     "build": "vite build ui",
     "deploy": "wrangler deploy",
     "preview": "vite preview ui",
-    "lint": "yarn eslint ui --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint ui --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "db:migrate": "wrangler d1 migrations apply DB --local",
     "db:migrations:apply": "wrangler d1 migrations apply DB --remote"
   },
